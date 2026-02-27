@@ -63,7 +63,31 @@
         return sanitizeClone(clone);
     }
 
+    function normalizeLooseTextNodes(article) {
+        if (!article || !article.childNodes) {
+            return;
+        }
+
+        var nodes = Array.prototype.slice.call(article.childNodes);
+        nodes.forEach(function (node) {
+            if (node.nodeType !== 3) {
+                return;
+            }
+
+            var value = node.nodeValue;
+            if (!value || !value.trim()) {
+                return;
+            }
+
+            var paragraph = document.createElement("p");
+            paragraph.textContent = value.trim();
+            article.insertBefore(paragraph, node);
+            article.removeChild(node);
+        });
+    }
+
     function buildSlides(article) {
+        normalizeLooseTextNodes(article);
         var elements = Array.prototype.slice.call(article.children);
         if (!elements.length) {
             return [];
