@@ -12,7 +12,6 @@
 | 03-04 | [[PATCH 0/3] RISC-V Zbr0p93 extension](https://lore.kernel.org/qemu-devel/20260304121113.117299-1-james.wainwright@lowrisc.org/) | James Wainwright | 添加未批准的 Zbr0p93 CRC32 扩展指令支持与反汇编器更新 |
 | 03-04 | [[PATCH 0/2] hw/riscv/riscv-iommu: Bug fixes and IPSR.PMIP support](https://lore.kernel.org/qemu-devel/20260304040959.47267-1-jay.chang@sifive.com/) | Jay Chang | 修复 RISC-V IOMMU HPM irq_overflow_left 残留值 bug，并添加 IPSR.PMIP RW1C 支持 |
 | 02-27 | [[PATCH 0/3] riscv: AIA: Add in-kernel irqchips save and restore function support](https://lore.kernel.org/qemu-devel/20260227180104794YvW9Rb2I_kAGzUruZL11Q@zte.com.cn/) | Liu Xuemei | 为 KVM RISC-V AIA 中断控制器添加保存/恢复功能，支持热迁移场景 |
-| 02-26 | [[PATCH] MAINTAINERS: Add myself as a reviewer for RISC-V TCG CPUs](https://lore.kernel.org/qemu-devel/20260226102008.146928-1-chao.liu.zevorn@gmail.com/) | Chao Liu | 将 Chao Liu 添加为 RISC-V TCG CPU 子系统的 reviewer |
 | 02-27 | [[PATCH] hw/riscv: Remove deprecated 'riscv, delegate' device-tree property](https://lore.kernel.org/qemu-devel/20260227232838.23392-1-philmd@linaro.org/) | Philippe Mathieu-Daudé | 移除已弃用的 `riscv,delegate` 设备树属性 |
 | 02-20 | [[PATCH qemu 00/11] Introduce ot-earlgrey machine](https://lore.kernel.org/qemu-devel/177159976712.8279.7732381632410882915-0@git.sr.ht/) | Lex Bailey | 引入 OpenTitan EarlGrey RISC-V 机器，包含 LowRisc Ibex hart 与 alert handler 外设 |
 
