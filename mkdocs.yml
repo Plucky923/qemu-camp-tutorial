@@ -91,7 +91,9 @@ nav:
   - 讲义:
     - QEMU 训练营 2026:
       - 训练营介绍: tutorial/2026/index.md
-      - 1. 导学阶段: tutorial/2026/ch0/index.md
+      - 1. 导学阶段:
+        - 本章导览: tutorial/2026/ch0/index.md
+        - a. GPU 发展历史: tutorial/2026/ch0/gpu-history.md
       - 2. 基础阶段:
         - 本章导览: tutorial/2026/ch1/index.md
         - a. 虚拟技术历史: tutorial/2026/ch1/vm-history.md

@@ -16,6 +16,8 @@
 
 !!! tip "体系结构"
 
+    [GPU 发展历史][gpu-history-local-link]
+
     [GPU 架构演化史 - zartbot][gpu-history-link]
 
     [RISC-V 体系结构编程与实践(第 2 版) - 笨叔][riscv-arch-book-link]
@@ -64,6 +66,7 @@
 [qemu-build-link]: https://qemu.readthedocs.io/en/v10.0.3/devel/build-system.html
 [qemu-c-env-link]: https://qemu.readthedocs.io/en/v10.0.3/devel/build-environment.html
 [qemu-rust-env-link]: https://hust-open-atom-club.github.io/rust-for-qemu-insides/articles/ch0/02-compile-and-debug/
+[gpu-history-local-link]: gpu-history.md
 [gpu-history-link]: https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzUxNzQ5MTExNw==&action=getalbum&album_id=2538479717163761664&scene=126&sessionid=1767843472496#wechat_redirect
 [riscv-arch-book-link]: https://weread.qq.com/web/reader/93d32980813ab937ag01027b
 [riscv-ima-link]: https://ima.qq.com/wiki/?shareId=d61a408f97d541e435252e06621456a0d40691fa7a4059008933fb72873b605f
