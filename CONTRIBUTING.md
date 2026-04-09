@@ -55,44 +55,47 @@
 2. **安装依赖**
 
    ```bash
-    # 创建虚拟环境
-    python -m venv .venv
+    # 初始化开发环境
+    # 自动创建 .venv、安装 Python 依赖与前端工具
+    make setup
 
-    # 激活虚拟环境
-    source .venv/bin/activate
-
-    # 安装 Python 依赖
-    pip install -r requirements.txt
-
-    # 安装前端工具（如 markdownlint 等）
-    npm install
-
-    # 使用完毕后退出虚拟环境
-    deactivate
+    # 查看全部可用命令
+    make help
    ```
 
 3. **`autocorrect`：中文排版/格式检查**
    项目地址：<https://github.com/huacnlee/autocorrect/>
-   请参考项目文档进行安装和使用。
+   项目已封装为 `make format` / `make lint`，也可参考官方文档单独使用。
 
 4. **`markdownlint-cli2`：Markdown 格式检查**
    项目地址：<https://github.com/DavidAnson/markdownlint-cli2>
-   请参考项目文档进行安装和使用。
+   项目已封装为 `make mdformat` / `make mdlint`，默认只处理当前改动过的 Markdown 文件，也可参考官方文档单独使用。
 
 5. **本地预览文档**
 
    ```bash
-    # 激活虚拟环境
-    source .venv/bin/activate
-
-    # 本地预览
-    zensical serve
-
-    # 使用完毕后退出虚拟环境
-    deactivate
+    # 本地预览（自动使用 .venv）
+    make serve
    ```
 
    然后在浏览器中打开 `http://127.0.0.1:8000` 进行预览。
+
+   常用命令：
+
+   ```bash
+    make format   # 自动修复中文排版
+    make lint     # 仅检查中文排版
+    make mdformat # 修复当前改动过的 Markdown 文件
+    make mdlint   # 检查当前改动过的 Markdown 文件
+    make build    # 构建站点
+    make shell    # 打开带 .venv 环境的交互 shell
+   ```
+
+   如需指定文件，可使用：
+
+   ```bash
+    make mdlint MD_FILES="README.md CONTRIBUTING.md"
+   ```
 
 6. **常用 Git 命令备忘**
 
@@ -307,8 +310,8 @@
 
 ## 本地验证
 <!-- 请确保您已在本地完成以下检查 -->
-- [ ] 已通过 `autocorrect .` (或 `autocorrect --lint .` 检查并通过)
-- [ ] 已执行 `zensical serve` 并在本地预览，确认页面渲染正常、链接有效、排版美观
+- [ ] 已执行 `make format`（必要时执行 `make mdformat` / `make mdlint`）
+- [ ] 已执行 `make serve` 并在本地预览，确认页面渲染正常、链接有效、排版美观
 
 ## 附加说明 (可选)
 <!-- 如有其他需要说明的事项，请在此填写 -->
