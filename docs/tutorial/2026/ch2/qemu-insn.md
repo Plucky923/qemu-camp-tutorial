@@ -18,283 +18,445 @@
 
 ## 指令译码
 
-### Decodetree 概述
+### 整体流程：一条指令从二进制到翻译函数
 
-Decodetree 是 Bastian Koppelmann 于 2017 年在移植 RISC-V QEMU 时提出的机制。提出该机制的主要原因是，过去的指令解码器（如 ARM）多通过大量 switch-case 进行判断，既难读也难维护。
-
-因此他提出 Decodetree：开发者只需用其语法定义各指令的格式，Decodetree 即可动态生成包含 switch-case 的指令解码器源码。
-
-Decodetree 本质是一个 Python 脚本，输入为体系结构的指令格式定义文件，输出为指令解码器源码文件。
+在深入语法细节之前，先理解 QEMU 对一条 guest 指令做了什么。以 RISC-V 的 `add x5, x6, x7` 为例，它的 32 位编码是：
 
 ```
-+-----------+           +-----------+            +-------------------+
-| arch-insn |   input   |  scripts/ |   output   | decode-@BASENAME@ |
-|  .decode  +---------->| decode.py +----------->|       .c.in       |
-+-----------+           +-----------+            +-------------------+
+0000000 00111 00110 000 00101 0110011
+ funct7  rs2   rs1  f3   rd    opcode
 ```
 
-- input: 体系结构的指令编码格式定义文件
-- output: 指令解码器源码（参与 QEMU 编译）
+QEMU 的处理分为三步：
+
+1. **译码（decode）**：从 32 位二进制中提取 `rd`、`rs1`、`rs2` 等字段，并匹配到具体指令。
+2. **翻译（translate）**：调用与该指令对应的 `trans_add()` 函数，生成 TCG 中间表示。
+3. **执行**：TCG 后端将 IR 编译为 host 指令并运行。
+
+其中第 1 步和第 2 步的衔接就是 Decodetree 的职责所在。
+
+```
+guest 指令 (32-bit 二进制)
+    │
+    ▼
+decode_insn32()                ← decodetree.py 自动生成
+  ① 匹配固定 bit 位 → 确定是哪条指令
+  ② 提取字段 → 填入 arg 结构体
+  ③ 调用 trans_xxx(ctx, arg_xxx *a)
+    │  例如 arg_r { .rd=5, .rs1=6, .rs2=7 }
+    ▼
+trans_add(ctx, arg_r *a)       ← 开发者手写
+  读取 rs1、rs2 寄存器 → 生成加法 TCG op → 写回 rd 寄存器
+    │
+    ▼
+TCG 后端编译为 host 指令并执行
+```
+
+### Decodetree 是什么
+
+Decodetree 是 Bastian Koppelmann 于 2017 年在移植 RISC-V 时提出的译码机制。在此之前，各架构的解码器通常用大量手写 switch-case 实现——既难读也难维护。Decodetree 的核心思路是：**开发者只需声明式地描述指令编码格式，由 Python 脚本自动生成 switch-case 解码器源码**。
+
+```
++----------------+           +---------------+            +-----------------------+
+| target/arch/   |  input    | scripts/      |  output    | decode-@BASENAME@     |
+| insn32.decode  +---------->| decodetree.py +----------->|     .c.inc            |
++----------------+           +---------------+            +-----------------------+
+```
+
+`.decode` 文件是开发者编写的声明式描述，`decodetree.py` 读取它后生成 `.c.inc` 文件，该文件在编译时被 `#include` 到翻译函数所在的 C 源码中。
+
+### 四层抽象：从字段到指令
+
+Decodetree 的 `.decode` 文件由四层声明组成，每一层解决一个具体问题：
+
+```
+Field（字段提取器）
+│   定义"从第几位开始取多少位"
+│   例如：%rd  7:5  →  "从 insn 的第 7 位开始，取 5 位"
+│
+│  被引用 ▼
+Argument Set（字段容器）
+│   定义"这类指令需要哪些字段"→ 生成 C 结构体
+│   例如：&r  rd rs1 rs2  →  typedef struct { int rd; int rs1; int rs2; } arg_r;
+│
+│  被引用 ▼
+Format（编码布局模板）
+│   定义"这类指令的 bit layout"，组合 Field 和 Argument Set
+│   例如：@r  ....... ..... ..... ... ..... .......  &r  %rs2 %rs1 %rd
+│   → 生成 decode_insn32_extract_r() 函数
+│
+│  被引用 ▼
+Pattern（具体指令）
+    定义"匹配这些固定 bit → 用这个 Format → 调这个 trans 函数"
+    例如：add  0000000 ..... ..... 000 ..... 0110011  @r
+    → 匹配成功后调用 trans_add(ctx, &u.f_r)
+```
+
+一句话总结四者的分工：
+
+| 层级 | 解决的问题 | 类比 |
+|------|-----------|------|
+| **Field** | 如何从 32 位指令中切出某个字段 | "取第 7~11 位" |
+| **Argument Set** | 这类指令需要哪些字段 | "R-type 需要 rd、rs1、rs2" |
+| **Format** | 一类指令的完整 bit 布局 | "R-type 是 funct7-rs2-rs1-funct3-rd-opcode" |
+| **Pattern** | 一条具体指令的匹配规则 | "funct7=0000000 + funct3=000 + opcode=0110011 就是 add" |
+
+接下来逐层介绍。每个小节都会以 RISC-V R-type 指令（`add`、`sub` 等）为主线示例，它们对应的真实代码位于 `target/riscv/insn32.decode`。
 
 ---
 
-Decodetree 的语法共分为四部分：Fields、Argument Sets、Formats、Patterns。
+### Field：字段提取器
 
-- Fields：描述指令编码中的寄存器、立即数等字段；
-- Argument Sets：描述用于保存从指令中提取出的各字段值的数据结构；
-- Formats：描述指令的格式，并生成相应的 decode function；
-- Pattern：描述一条指令的 decode 方式。
+Field 回答的问题是：**"我想从 32 位指令编码中的哪个位置、取多少位，作为某个字段的值？"**
 
----
-
-### Decodetree 字段
-
-Field 用于定义如何从一条指令中提取各字段（如 rd、rs1、rs2、imm）的值。
+以 RISC-V 为例，几乎所有指令都包含 `rd`（目标寄存器）字段，位于 insn[11:7]：
 
 ```
-field_def     := '%' identifier ( unnamed_field )* ( !function=identifier )?
-unnamed_field := number ':' ( 's' ) number  eg: %rd 7:5 => insn[11:7]
+31                 12  11   7  6   0
++-------------------+-------+------+
+|       ...         |  rd   | ...  |
++-------------------+-------+------+
 ```
 
-- identifier 可由开发者自定，如 rd、imm 等
-- unnamed_field 定义该字段所在的比特/位域，s 字符用于标明取出字段后是否需要做符号扩展
-- !function 指定在截取字段值后需要调用的函数
-
----
-
-```c
-以 RISC-V 的 U-type 指令为例：
-31                              12  11                 7  6    0
-+----------------------------------+--------------------+------+
-|            imm[31:12]            |         rd         |opcode| U-type
-+----------------------------------+--------------------+------+
-
-可声明为：
-%rd       7:5
-%imm_u    12:s20                 !function=ex_shift_12
-
-最后会生成如下的代码：
-static void decode_insn32_extract_u(DisasContext *ctx, arg_u *a, uint32_t insn)
-{
-    a->imm = ex_shift_12(ctx, sextract32(insn, 12, 20)); // 是由 insn[31:12] 所取得并做符号扩展，且会再调用 ex_shift_12() 来左移 12 个 bits
-    a->rd = extract32(insn, 7, 5); // 由 insn[11:7] 所取得
-}
-```
-
----
-
-### Decodetree 参数集合
-
-Argument Set 用于保存从指令中截取的各字段值。
+对应的 Field 定义：
 
 ```
-args_def    := '&' identifier ( args_elt )+ ( !extern )?
-args_elt    := identifier
+%rd    7:5
 ```
 
-- identifier 可由开发者自定义，如 regs、loadstore 等
-- !extern 表示是否已在其他地方由其他 decoder 定义过。若已定义，则不会再次生成对应的 argument set 结构体
+含义：从 insn 的**第 7 位**开始，取 **5 位**。Decodetree 会据此生成 `extract32(insn, 7, 5)` 来提取。
 
-```c
-# U-type 指令格式示例
-&u    imm rd
+#### 符号扩展
 
-# 生成如下代码
-typedef struct {
-    int imm;
-    int rd;
-} arg_u;
-```
-
----
-
-### Decodetree 格式
-
-Format 用于描述指令格式（如 RISC-V 的 R、I、S、B、U、J-type），并生成对应的 decode function。
+立即数字段通常需要符号扩展。例如 RISC-V I-type 的 12 位立即数 `imm[11:0]` 位于 insn[31:20]，需要符号扩展到 32/64 位：
 
 ```
-fmt_def      := '@' identifier ( fmt_elt )+
-fmt_elt      := fixedbit_elt | field_elt | field_ref | args_ref
-fixedbit_elt := [01.-]+
-field_elt    := identifier ':' 's'? number
-field_ref    := '%' identifier | identifier '=' '%' identifier
-args_ref     := '&' identifier
-```
-
-- identifier 可由开发者自定义，如 opr、opi 等
-
-- fmt_elt 可采用以下语法：
-    - fixedbit_elt 包含一个或多个 `0`、`1`、`.`、`-`，每个代表指令中的 1 个 bit。
-        `.` 代表该 bit 可以是 0 或 1。
-        `-` 代表该 bit 会被忽略。
-
----
-
-- field_elt 可以用 Field 的语法来声明，如 ra:5、rb:5、lit:8
-
-- field_ref 有两种格式（以下示例参考上文所定义的 Field）：
-    - `'%' identifier`：直接引用一个已定义的 Field。
-
-        - 如：`%rd`，会生成：
-        ```
-        a->rd = extract32(insn, 7, 5);
-        ```
-
-    - `identifier '=' '%' identifier`：引用一个已定义的 Field，并用左侧 identifier 重命名对应的 argument 名称。此方式可用不同的 argument 名称指向同一个 Field
-
-        - 如：`my_rd=%rd`，会生成：
-        ```
-        a->my_rd = extract32(insn, 7, 5)
-        ```
-    - args_ref 指定 decode function 所使用的 Argument Set。若未指定 args_ref，Decodetree 会根据 field_elt 或 field_ref 自动生成一个 Argument Set。此外，一个 Format 最多只能包含一个 args_ref
-
-!!! note
-
-    当 fixedbit_elt 或 field_ref 被使用时，该 Format 的所有 bit 都必须被定义（可通过 `fixedbit_elt` 或 `.` 填满，空格会被忽略）。
-
----
-
-```
-@opi    ...... ra:5 lit:8    1 ....... rc:5
-```
-
-- insn[31:26] 可为 0 或 1
-- insn[25:21] 为 ra，insn[20:13] 为 lit
-- insn[12] 固定为 1
-- insn[11:5] 可为 0 或 1
-- insn[4:0] 为 rc
-
-此 Format 会生成以下的 decode function：
-
-```c
-// 由于我们没有指定 args_ref，因此 Decodetree 根据 field_elt 的定义自动生成了 arg_decode_insn320 这个 Argument Set
-typedef struct {
-    int lit;
-    int ra;
-    int rc;
-} arg_decode_insn320;
-static void decode_insn32_extract_opi(DisasContext *ctx, arg_decode_insn320 *a, uint32_t insn)
-{
-    a->ra = extract32(insn, 21, 5);
-    a->lit = extract32(insn, 13, 8);
-    a->rc = extract32(insn, 0, 5);
-}
-```
-
----
-
-以 RISC-V I-type 指令为例：
-
-```
-31           20 19    15 14     12  11                 7  6    0
-+--------------+--------+----------+--------------------+------+
-|   imm[11:0]  |  rs1   |  funct3  |         rd         |opcode| I-type
-+--------------+--------+----------+--------------------+------+
-
-# Fields:
-%rs1       15:5
-%rd        7:5
-
-# immediates:
 %imm_i    20:s12
-
-# Argument sets:
-&i    imm rs1 rd
-
-@i       ........ ........ ........ ........ &i      imm=%imm_i     %rs1 %rd
 ```
+
+`s` 前缀表示做符号扩展（sign-extend）。生成代码为 `sextract32(insn, 20, 12)` 而非 `extract32`。
+
+#### 多段拼接与后处理函数
+
+有些字段由多个不连续的位段拼接而成。例如 RISC-V B-type 的立即数 `imm[12|10:5|4:1|11]` 分散在 4 个位置：
+
+```
+%imm_b    31:s1 7:1 25:6 8:4     !function=ex_shift_1
+```
+
+多个 `位起:宽度` 对会从左到右依次拼接。`!function=ex_shift_1` 指定拼接后再调用 `ex_shift_1()` 做左移 1 位的后处理。这是实际中最复杂的 Field 用法。
+
+!!! info "语法参考"
+
+    ```
+    field_def     := '%' identifier ( unnamed_field )* ( !function=identifier )?
+    unnamed_field := number ':' ( 's' ) number
+    ```
+
+    - `identifier`：字段名，如 `rd`、`imm_i`
+    - `unnamed_field`：`起始位:宽度` 或 `起始位:s宽度`（`s` 表示符号扩展）
+    - `!function=xxx`：提取完成后调用函数 `xxx` 做后处理
 
 ---
 
-此范例会生成以下的 decode function：
+### Argument Set：字段容器
+
+Argument Set 回答的问题是：**"这类指令译码后，需要把哪些字段打包传给 trans 函数？"**
+
+为什么需要它？因为**多条指令共享相同的字段集合**。RISC-V 中 `add`、`sub`、`and`、`or` 等 R-type 指令都需要 `rd`、`rs1`、`rs2` 三个字段。如果每条指令都单独声明一遍字段，既冗余又不一致。Argument Set 把公共字段集合抽取出来：
 
 ```
+&r    rd rs1 rs2
+```
+
+Decodetree 会生成对应的 C 结构体，这个结构体正是 `trans_add(ctx, arg_r *a)` 中第二个参数的类型：
+
+```c
 typedef struct {
-    int imm;
     int rd;
     int rs1;
-} arg_i;
+    int rs2;
+} arg_r;
+```
 
+因此在 `trans_add` 中通过 `a->rs1` 即可访问到译码阶段提取的字段值。
+
+类似地，I-type 指令（`addi`、`ori` 等）共享 `&i imm rs1 rd`，U-type 指令（`lui`、`auipc`）共享 `&u imm rd`。
+
+!!! info "语法参考"
+
+    ```
+    args_def    := '&' identifier ( args_elt )+ ( !extern )?
+    args_elt    := identifier
+    ```
+
+    - `!extern`：表示此 Argument Set 已在其他 `.decode` 文件中定义过，不需要再次生成结构体。用于多个 decoder 文件共享同一个 Argument Set 的场景。
+
+---
+
+### Format：编码布局模板
+
+Format 回答的问题是：**"这类指令的 32 个 bit 各自是什么含义？"** 它把 Field 和 Argument Set 组合在一起，描述完整的 bit 布局，并据此生成 extract 函数。
+
+以 RISC-V R-type 为例。它的编码格式是：
+
+```
+31     25 24  20 19  15 14  12 11   7 6    0
++--------+------+------+-----+------+------+
+| funct7 | rs2  | rs1  | f3  |  rd  |opcode|
++--------+------+------+-----+------+------+
+```
+
+对应的 Format 定义（取自 `target/riscv/insn32.decode`）：
+
+```
+@r    .......   ..... ..... ... ..... .......  &r  %rs2 %rs1 %rd
+```
+
+逐列解读：
+
+```
+@r    .......   .....  .....  ...  .....  .......  &r       %rs2     %rs1     %rd
+      ↑funct7   ↑rs2   ↑rs1  ↑f3  ↑rd    ↑opcode  ↑argset  ↑field   ↑field   ↑field
+      7个.      5个.   5个.  3个. 5个.   7个.     &r       %rs2     %rs1     %rd
+```
+
+- 每个 `.` 代表一个"可以是 0 或 1"的 bit（即不参与匹配，由 Field 定义来提取）
+- `&r` 指定使用 `arg_r` 结构体来保存提取结果
+- `%rs2`、`%rs1`、`%rd` 引用前面定义的 Field，告诉 Decodetree 从哪里提取这些字段
+
+Decodetree 据此生成 extract 函数：
+
+```c
+static void decode_insn32_extract_r(DisasContext *ctx, arg_r *a, uint32_t insn)
+{
+    a->rs1 = extract32(insn, 15, 5);
+    a->rd  = extract32(insn, 7, 5);
+    a->rs2 = extract32(insn, 20, 5);
+}
+```
+
+这就是 `trans_add(ctx, arg_r *a)` 中 `a` 结构体被填充的过程。
+
+#### 再看 I-type：立即数的处理
+
+I-type 的 Format 更好地展示了立即数字段如何与 Field 配合：
+
+```
+@i    ............  .....  ...  .....  .......  &i  imm=%imm_i  %rs1 %rd
+      ↑imm[11:0]   ↑rs1   ↑f3  ↑rd    ↑opcode
+      12个.
+```
+
+其中 `imm=%imm_i` 意味着：结构体的 `imm` 成员由 `%imm_i` 这个 Field 提取（从 insn[31:20] 取 12 位并符号扩展）。`%imm_i` 的定义见上文 Field 节。
+
+生成的 extract 函数：
+
+```c
 static void decode_insn32_extract_i(DisasContext *ctx, arg_i *a, uint32_t insn)
 {
     a->imm = sextract32(insn, 20, 12);
     a->rs1 = extract32(insn, 15, 5);
-    a->rd = extract32(insn, 7, 5);
+    a->rd  = extract32(insn, 7, 5);
 }
 ```
 
----
+#### fixedbit：固定匹配位
 
-回到前面的 RISC-V U-type 指令，我们可以按 I-type 指令的方式定义其格式：
+除了 `.` 以外，Format 中还可以用 `0` 和 `1` 表示该 bit **必须**是 0 或 1。例如 `@atom_ld` 格式：
 
 ```
-# Fields:
+@atom_ld  ..... aq:1 rl:1 ..... ........ ..... .......  &atomic  rs2=0  %rs1 %rd
+```
+
+其中 `aq:1 rl:1` 是内联的 field_elt，直接在 Format 中声明字段而非引用 Field。`rs2=0` 是 const_elt，将 `rs2` 固定为 0。
+
+!!! info "语法参考"
+
+    ```
+    fmt_def      := '@' identifier ( fmt_elt )+
+    fmt_elt      := fixedbit_elt | field_elt | field_ref | args_ref
+    fixedbit_elt := [01.-]+
+    field_elt    := identifier ':' 's'? number
+    field_ref    := '%' identifier | identifier '=' '%' identifier
+    args_ref     := '&' identifier
+    ```
+
+    - `fixedbit_elt`：`0`/`1` 表示必须匹配的固定 bit，`.` 表示无关 bit，`-` 表示忽略 bit
+    - `field_elt`：内联字段声明（如 `aq:1`），不需要单独定义 Field
+    - `field_ref`：引用已定义的 Field
+        - `%rd`：直接引用
+        - `my_rd=%rd`：引用 Field 并重命名结构体成员（不同的 argument 名指向同一个 Field）
+    - `args_ref`：指定 Argument Set，一个 Format 最多一个
+
+    !!! warning
+
+        当 Format 包含 fixedbit_elt 或 field_ref 时，所有 bit 位都必须被定义（用 `0`/`1`/`.` 填满），空格会被忽略。未指定 `args_ref` 时，Decodetree 会根据 field_elt/field_ref 自动生成一个 Argument Set。
+
+---
+
+### Pattern：具体指令
+
+Pattern 回答的问题是：**"这条具体指令的 opcode 和 funct 字段是什么？"** 它通过固定 bit 位来匹配一条指令，并引用 Format 来处理其余字段。
+
+以 `add` 为例（`target/riscv/insn32.decode:159`）：
+
+```
+add    0000000  .....  .....  000  .....  0110011  @r
+       ^^^^^^^         ^^^^^  ^^^         ^^^^^^^
+       funct7          rs2    funct3      opcode
+       固定为           Format 提取       固定为
+       0000000                            0110011
+```
+
+Decodetree 生成的匹配逻辑大致如下（简化）：
+
+```c
+case 0x00000033:                          // opcode = 0110011
+    switch (insn & 0x3e007000) {
+    case 0x00000000:                      // funct3 = 000
+        decode_insn32_extract_r(ctx, &u.f_r, insn);
+        switch ((insn >> 30) & 0x3) {
+        case 0x0:                         // funct7 = 0000000
+            if (trans_add(ctx, &u.f_r)) return true;    // ← 调用 trans 函数
+            break;
+        case 0x1:                         // funct7 = 0100000
+            if (trans_sub(ctx, &u.f_r)) return true;
+            break;
+        }
+        break;
+    // ... funct3 = 001, 010, ... 各分支
+    }
+```
+
+关键规则：
+
+- **Pattern 名字决定 trans 函数名**：`add` → `trans_add()`，`sub` → `trans_sub()`
+- **固定 bit 位用于匹配**：`0000000`、`000`、`0110011` 这些是必须精确匹配的
+- **其余位通过 `@fmt` 引用 Format 处理**：Format 中的 field_ref（如 `%rs2`）负责提取对应位置的字段值
+- **Pattern 的所有 bit 都必须被定义**：固定 bit + Format 中对应的位必须覆盖全部 32 bit
+
+#### 重叠 Pattern 与分组
+
+当多条指令共享部分编码时，可以用 `{ ... }` 分组表达重叠。例如 RISC-V 中 `auipc` 和 `lpad` 共享同一个 opcode：
+
+```
+{
+  lpad   label:20    00000 0010111
+  auipc  .................... 0010111 @u
+}
+```
+
+Decodetree 会按定义顺序依次尝试匹配，先尝试 `lpad`（更具体的），不匹配则回退到 `auipc`。
+
+!!! info "语法参考"
+
+    ```
+    pat_def   := identifier ( pat_elt )+
+    pat_elt   := fixedbit_elt | field_elt | field_ref | args_ref | fmt_ref | const_elt
+    fmt_ref   := '@' identifier
+    const_elt := identifier '=' number
+    ```
+
+    - `fmt_ref`：引用 Format（如 `@r`）
+    - `const_elt`：直接给某个 argument 赋常量值（如 `rs2=0`）
+    - 其余语法与 Format 相同
+
+---
+
+### 端到端走查：`add x5, x6, x7` 的完整旅程
+
+现在用一条真实指令走完全程，串联所有概念。
+
+#### 第一步：指令编码
+
+`add x5, x6, x7` 汇编后（rd=5, rs1=6, rs2=7, funct7=0, funct3=0, opcode=0x33）：
+
+```
+0000000 00111 00110 000 00101 0110011  =  0x007302B3
+```
+
+#### 第二步：`.decode` 文件中的声明
+
+```
+# Field：告诉 Decodetree 从哪里提取各字段
+%rs2       20:5
+%rs1       15:5
 %rd        7:5
 
-# immediates:
-%imm_u    12:s20                 !function=ex_shift_12
+# Argument Set：打包为 arg_r 结构体
+&r    rd rs1 rs2
 
-# Argument sets:
-&u    imm rd
+# Format：描述 R-type 的 bit 布局
+@r    ....... ..... ..... ... ..... ....... &r %rs2 %rs1 %rd
 
-@u       ....................      ..... ....... &u      imm=%imm_u          %rd
+# Pattern：匹配 add 的固定 bit 位
+add   0000000 ..... ..... 000 ..... 0110011 @r
 ```
 
-会生成以下的 decode function：
+#### 第三步：decodetree.py 生成的代码
 
-```
+**结构体**（由 `&r` 生成）：
+
+```c
 typedef struct {
-    int imm;
     int rd;
-} arg_u;
+    int rs1;
+    int rs2;
+} arg_r;
+```
 
-static void decode_insn32_extract_u(DisasContext *ctx, arg_u *a, uint32_t insn)
+**Extract 函数**（由 `@r` + 引用的 Field 生成）：
+
+```c
+static void decode_insn32_extract_r(DisasContext *ctx, arg_r *a, uint32_t insn)
 {
-    a->imm = ex_shift_12(ctx, sextract32(insn, 12, 20));
-    a->rd = extract32(insn, 7, 5);
+    a->rs1 = extract32(insn, 15, 5);   // %rs1  15:5
+    a->rd  = extract32(insn, 7, 5);    // %rd   7:5
+    a->rs2 = extract32(insn, 20, 5);   // %rs2  20:5
 }
 ```
 
----
+**匹配逻辑**（由 `add` Pattern 的固定 bit 生成，以下仅为概念演示，实际代码见 `decode-insn32.c.inc`）：
 
-### Decodetree 模式
-
-Pattern 用于定义一条指令的 decode 方式。Decodetree 会根据 Patterns 的定义，动态生成对应的 switch-case 解码分支。
-
-```
-pat_def      := identifier ( pat_elt )+
-pat_elt      := fixedbit_elt | field_elt | field_ref | args_ref | fmt_ref | const_elt
-fmt_ref      := '@' identifier
-const_elt    := identifier '=' number
-```
-
-- identifier 可由开发者自定义，如 addl_r、addli 等
-
-- pat_elt 可采用以下语法：
-
-    - fixedbit_elt 与 Format 中 fixedbit_elt 的定义相同。
-    - field_elt 与 Format 中 field_elt 的定义相同。
-    - field_ref 与 Format 中 field_ref 的定义相同。
-    - args_ref 与 Format 中 args_ref 的定义相同。
-    - fmt_ref 直接引用一个已定义的 Format。
-    - const_elt 可以直接指定某个 argument 的值。
-
----
-
-Pattern 示例：
-
-```
-addl_i   010000 ..... ..... .... 0000000 ..... @opi
+```c
+case 0x00000033:                             // opcode 匹配 0110011
+    decode_insn32_extract_r(ctx, &u.f_r, insn);
+    if ((insn & 0xfe000000) == 0x00000000    // funct7 匹配 0000000
+        && (insn & 0x00007000) == 0x00000000) // funct3 匹配 000
+    {
+        if (trans_add(ctx, &u.f_r)) return true;
+    }
 ```
 
-该 Pattern 定义了 addl_i 指令，其中：
+#### 第四步：trans 函数执行
 
-- insn[31:26] 为 010000。
-- insn[11:5] 为 0000000。
-- 参考了 Format 示例中定义的 @opi Format。
-- 由于 Pattern 的所有 bits 都必须**明确地定义**，因此 @opi 必须包含其余 insn[25:12] 及 insn[4:0] 的格式定义，否则 Decodetree 会报错。
+此时 `u.f_r` 中已经填好了 `{ .rd=5, .rs1=6, .rs2=7 }`。Decodetree 会为每条指令生成类型别名（`typedef arg_r arg_add`），所以 `trans_add` 的参数类型是 `arg_add *` 而非 `arg_r *`——底层结构完全相同，这样做可以在编译期捕获不同指令类型之间的误用。
 
-最后 addl_i 的 decoder 会调用 trans_addl_i() 这个 translator 函数。
+```c
+static bool trans_add(DisasContext *ctx, arg_add *a)
+{
+    return gen_arith(ctx, a, EXT_NONE, tcg_gen_add_tl, tcg_gen_add2_tl);
+}
+```
+
+`gen_arith` 内部从 `a->rs1`、`a->rs2` 读取 guest 寄存器值，用 `tcg_gen_add_tl` 生成加法 TCG op，结果写回 `a->rd` 对应的 guest 寄存器。
+
+#### 回顾：数据流全貌
+
+```
+add x5, x6, x7  (0x007302B3)
+    │
+    ▼  decode_insn32() 匹配 opcode → funct3 → funct7
+    │
+    ▼  decode_insn32_extract_r() 提取字段
+    │  → arg_r { .rd=5, .rs1=6, .rs2=7 }
+    │
+    ▼  trans_add(ctx, &arg_r)
+    │  → gen_arith() → tcg_gen_add_tl(dest, src1, src2)
+    │
+    ▼  TCG 后端编译为 host 指令并执行
+```
 
 ---
 
