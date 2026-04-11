@@ -100,6 +100,16 @@ qemu-camp-2026-<你的 GitHub ID>.md
 （收获、感想、对后续学员的建议等）
 ```
 
+然后更新 `mkdocs.yml` 文件，在播客专栏，按照顺序，添加文章的标题和链接。
+
+```
+  - 博客:
+    - 介绍页: blogs/index.md
+    - 训练营 2026:
+      - 专业阶段总结 dingtao1: blogs/2026/qemu-camp-2026-dingtao1.md
+      - 专业阶段总结 <你的 GitHub ID>: blogs/2026/qemu-camp-2026-<github_id>.md
+```
+
 !!! note "参考博客"
 
     - [专业阶段总结 dingtao1](../../blogs/2026/qemu-camp-2026-dingtao1.md)
