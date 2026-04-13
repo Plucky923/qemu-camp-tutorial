@@ -206,7 +206,7 @@ cargo install bindgen-cli
 ```bash
 mkdir build-rust && cd build-rust
 ../configure \
-    --target-list="aarch64-softmmu,x86_64-softmmu,riscv64-softmmu" \
+    --target-list=riscv64-softmmu \
     --enable-rust \
     --enable-slirp
 ```
