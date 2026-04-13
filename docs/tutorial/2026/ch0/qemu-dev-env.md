@@ -192,6 +192,30 @@ gdb --args ./build/qemu-system-riscv64 -machine virt -nographic -bios none
 
     调试技巧的详细介绍请参考基础阶段的 [常用调试方法](../ch1/qemu-debug.md)。
 
+## Rust 开发环境配置（可选）
+
+如需启用 QEMU 的 Rust 支持（用于 Rust 设备模型开发），需要额外安装 Rust 工具链和 bindgen：
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+cargo install bindgen-cli
+```
+
+配置时添加 `--enable-rust` 并确保 `target-list` 包含 `riscv64-softmmu`：
+
+```bash
+mkdir build-rust && cd build-rust
+../configure \
+    --target-list=riscv64-softmmu \
+    --enable-rust \
+    --enable-slirp
+```
+
+!!! tip "更多信息"
+
+    Rust FFI 机制的详细介绍请参考专业阶段的 [Rust FFI](../ch2/qemu-rust-ffi.md)。
+
 ## 附录：CNB qemu-lab 云原生一键开发
 
 如果你不想花时间在本地配置环境，可以使用 CNB（Cloud Native Build）平台提供的云端开发环境。`qemu-lab` 项目已经预配置了完整的 QEMU 编译环境，开箱即用。

@@ -69,7 +69,7 @@
 [qemu-devel-email-link]: ../../../blogs/misc/qemu-devel-email.md
 [qemu-build-link]: https://qemu.readthedocs.io/en/v10.0.3/devel/build-system.html
 [qemu-c-env-link]: https://qemu.readthedocs.io/en/v10.0.3/devel/build-environment.html
-[qemu-rust-env-link]: https://hust-open-atom-club.github.io/rust-for-qemu-insides/articles/ch0/02-compile-and-debug/
+[qemu-rust-env-link]: qemu-dev-env.md#rust-开发环境配置可选
 [qemu-dev-env-local-link]: qemu-dev-env.md
 [gpgpu-resources-local-link]: gpgpu-resources.md
 [gpu-history-local-link]: gpu-history.md
