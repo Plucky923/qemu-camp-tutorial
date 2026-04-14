@@ -161,7 +161,7 @@ A:[DDDDDDDDDDDDDDDDD|CCCCCCCCCCCCCCCCC|BBBBBBBBBBBBBBBBB|AAAAAAAAAAAAAAAAA]
 
 ## 初始化流程
 
-我们从 QEMU 初始化过程，来理解 mr 和 address-space 的关系：
+通过 `info mtree` 的输出，我们已经看到了 QEMU 运行时的完整地址空间布局。接下来的问题是：这些 mr 和 address-space 是在什么时机、由哪些代码创建出来的？我们从 QEMU 初始化流程入手来回答这个问题。
 
 ```bash
 main() // system/main.c
@@ -325,6 +325,8 @@ in memory_region_initfn (obj=<optimized out>) at ../system/memory.c:1281QTAILQ_I
 
 ## 节点间关系
 
+前面我们观察了根节点 `system_memory` 自身字段的初始化过程。但一个空的根节点还不够——各种设备的 mr 需要作为子节点挂载到它下面，才能构成完整的地址映射树。接下来我们继续用 GDB watchpoint 来观察子节点是如何被添加进来的。
+
 如果进一步监视 system_memory->subregions，你将得到这个其他 mr 节点是被如何添加进来的：
 
 ```bash
@@ -405,7 +407,7 @@ address-space 内有一个 root 字段，指向 memory-region 的根节点，这
                                       +------------------------+                   +------------------------+
 ```
 
-每个 mr 会对应到具体的内存块 RAMBlock，这个内存块从 Host 申请，作为 Guest 外围设备的存储。
+每个 mr 会对应到具体的内存块 RAMBlock（QEMU 内部用于管理一段宿主机内存的数据结构，通常通过 `mmap` 分配，记录了大小、偏移和宿主机虚拟地址等信息），这个内存块从 Host 申请，作为 Guest 外围设备的存储。
 
 mr 提供了一些类型，用于描述存储设备，常见的有 RAM、ROM、IOMMU、container。
 
