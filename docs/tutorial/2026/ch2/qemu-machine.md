@@ -8,7 +8,7 @@
 
     本文基于 QEMU **v10.2.0**（tag: [`v10.2.0`](https://gitlab.com/qemu-project/qemu/-/tags/v10.2.0)，commit: `75eb8d57c6b9`）。
 
-QEMU 里的”主板”对应 machine model（机型）。它不是一颗 CPU，也不是单个外设，而是**把 CPU 拓扑、内存布局、总线、外设、中断路由、固件入口**统一编排起来的一层“板级模型”。
+QEMU 里的“主板”对应 machine model（机型）。它不是一颗 CPU，也不是单个外设，而是**把 CPU 拓扑、内存布局、总线、外设、中断路由、固件入口**统一编排起来的一层“板级模型”。
 
 !!! tip "概览"
 
@@ -55,6 +55,8 @@ static const TypeInfo virt_machine_typeinfo = {
 ```
 
 QOM 文档强调：类型注册、单继承、多接口和属性系统是 QEMU 设备/主板组织的基础。[1]
+
+注册好 QOM 类型后，QEMU 在启动时需要根据用户的 `-machine` 参数选择对应的机型类，并完成实例化。下面我们追踪这个流程。
 
 ## 创建流程
 
@@ -111,6 +113,8 @@ void machine_run_board_init(MachineState *machine, const char *mem_path, Error *
 ```
 
 这条链路和 2025 训练营文档里的“机器创建流程”是一致的，只是这里更聚焦主板本身的职责。
+
+以上是通用的创建流程。接下来我们以 RISC-V virt 为例，看看 `mc->init()` 里面具体做了什么——这也是理解任何主板模型的最佳入口。
 
 ## 板级例子
 

@@ -10,7 +10,7 @@
 
 我们以 PL011 串口为例，说明 QEMU 外设建模的主要方法。选择 PL011 作为讲解对象的原因是，这个设备同样实现了 Rust 版本，方便大家学习，同时，PL011 也是我们专业阶段实验 G233 主板所使用的串口设备。
 
-PL011 的实现位于 `hw/char/pl011.c`，状态定义在 `include/hw/char/pl011.h`。它是一个典型的 SysBus 设备：通过 QOM 注册类型、用状态结构描述寄存器与 FIFO、用 MMIO 回调响应访问、并通过 IRQ 线连接到平台中断控制器（如 GIC）。
+PL011 的实现位于 `hw/char/pl011.c`，状态定义在 `include/hw/char/pl011.h`。它是一个典型的 SysBus 设备（QEMU 中用于建模直接挂载在系统总线上的平台设备，如串口、GPIO、定时器等，区别于 PCIe 等总线设备）：通过 QOM 注册类型、用状态结构描述寄存器与 FIFO、用 MMIO 回调响应访问、并通过 IRQ 线连接到平台中断控制器（如 GIC）。
 
 !!! tip "概览"
 
@@ -49,6 +49,8 @@ static void pl011_register_types(void)
 
 type_init(pl011_register_types)
 ```
+
+类型注册让 QEMU 知道了 PL011 的存在和继承关系。接下来我们看它的内部状态是如何组织的——这些状态直接对应真实硬件的寄存器和 FIFO。
 
 ## 状态结构
 
@@ -107,6 +109,8 @@ static void pl011_init(Object *obj)
 }
 ```
 
+instance_init 搭好了 MMIO 和 IRQ 的骨架，但设备的 chardev 后端绑定（即串口数据的实际来源和去向）还需要等到 realize 阶段才能完成。类初始化正是注册这些 realize 回调的地方。
+
 ## 类初始化
 
 类初始化负责绑定 realize/reset/vmstate，并暴露属性：
@@ -129,7 +133,9 @@ static void pl011_class_init(ObjectClass *oc, const void *data)
 }
 ```
 
-`chardev` 决定串口后端（终端、文件、socket），`migrate-clk` 控制时钟是否参与迁移。
+`chardev`（字符设备后端，决定串口数据的实际来源和去向，可以是终端、文件或 socket）决定串口后端，`migrate-clk` 控制时钟是否参与迁移（即 VM 实时迁移时是否保存和恢复时钟状态）。
+
+注册好 realize 和 reset 回调后，设备模型的核心行为通过 MMIO 读写来驱动——每次客户机访问 PL011 的寄存器地址，都会触发对应的回调函数。
 
 ## MMIO 逻辑
 
@@ -191,6 +197,8 @@ static void pl011_update(PL011State *s)
 
 这也是 PL011 比“简单 UART”更复杂的地方：它不仅有 RX/TX 中断，还建模了错误与调制解调器状态中断。
 
+到这里，PL011 的设备行为已经完整：寄存器读写、FIFO 状态机和中断控制。最后一步是把它集成到具体的机型中，完成地址映射和中断连线。
+
 ## 机型集成
 
 在 ARM virt 机型中，PL011 的集成在 `hw/arm/virt.c` 里完成（节选）：
@@ -207,6 +215,8 @@ sysbus_connect_irq(s, 0, qdev_get_gpio_in(vms->gic, irq));
 ```
 
 除此之外，virt 还会把 PL011 节点写入设备树（compatible、reg、interrupts、clock-names），并设置 `stdout-path`，让客户机把它作为默认串口。
+
+设备被集成到机型后就可以正常工作了。但如果需要支持 VM 实时迁移，设备还需要定义哪些状态需要被保存和恢复。
 
 ## 迁移时钟
 

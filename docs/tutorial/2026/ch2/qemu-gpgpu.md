@@ -8,7 +8,7 @@
 
     本文基于 QEMU **v10.2.0**（tag: [`v10.2.0`](https://gitlab.com/qemu-project/qemu/-/tags/v10.2.0)，commit: `75eb8d57c6b9`）。
 
-GPGPU（General-Purpose GPU）把 GPU 从”图形渲染器”变成”通用并行计算器”。它靠大量并行线程隐
+GPGPU（General-Purpose GPU）把 GPU 从“图形渲染器”变成“通用并行计算器”。它靠大量并行线程隐
 藏内存延迟，用吞吐量换取响应时间，是与 CPU 完全不同的设计哲学。
 
 本文的目的在于提供一个理解 GPGPU 的全局视角与知识背景，但重心是关注如何在 QEMU 上集成或建模
@@ -108,6 +108,8 @@ MIMD 示意图：
 (same program, independent control flow)
 ```
 
+执行模型决定了 GPU 如何组织和调度线程。但线程执行的效率在很大程度上取决于数据的存取速度，这就引出了 GPGPU 的另一个核心主题——内存层次。
+
 ## 内存层次
 
 GPU 的性能很大程度上由内存层次决定。常见层次如下（从快到慢）：
@@ -129,6 +131,8 @@ HBM 示意：
          (high bandwidth, sensitive to access pattern)
 ```
 
+了解了内存层次之后，我们来看一次完整的 GPGPU 计算从 CPU 到 GPU 再返回的端到端流程。
+
 ## 执行流程
 
 一个典型的 GPGPU 执行流程是：
@@ -147,6 +151,8 @@ HBM 示意：
     - **分支发散**：同一 warp 内尽量走同一路径。
     - **访存合并**：连续地址的线程一起访问全局内存。
     - **数据复用**：优先放进共享内存或寄存器。
+
+以上是单机 GPU 的计算流程。当单块 GPU 的算力不足以满足需求时，就需要将多块 GPU 甚至多台机器连接起来协同工作。
 
 ## 多节点互联
 
@@ -200,6 +206,8 @@ Host -> Infeed -> [ Systolic Array ] -> Outfeed -> Host
 
 从趋势看，DSA（Domain-Specific Accelerator，领域专用加速器）正在成为 GPGPU 体系的重要补充：在通用 GPU 上集成或外挂专用单元，针对矩阵乘、稀疏计算、注意力等固定模式做定制化加速，以更高能效完成特定负载。
 
+以上讨论了工业界的 GPU 和 ASIC 加速方案。对于教学和架构研究，开源 GPGPU 项目提供了可修改、可实验的平台。
+
 ## 开源 GPGPU
 
 开源 GPGPU 代表项目之一是 **Vortex**：基于 RISC-V 的 GPGPU 平台，支持 OpenCL，常见形态是
@@ -234,9 +242,11 @@ GPGPU-Sim 是面向体系结构研究的开源 GPGPU 模拟器。它的基本工
 
 使用时通常只需要准备应用运行所必需的最小环境，模拟器负责完成指令执行与统计输出。它常被用于教学或架构探索，例如对比不同调度策略、存储层次配置对性能的影响。
 
+GPGPU-Sim 等模拟器在 CPU 上复现 GPU 行为，但它们通常独立运行，不涉及完整的系统环境。如果需要在完整的虚拟机系统中集成 GPGPU 设备——让 Guest OS 加载驱动并通过 PCIe 与 GPU 交互——就需要借助 QEMU 的系统模拟能力。
+
 ## QEMU 集成
 
-要在 QEMU 中集成 GPGPU cmodel（仿真模型），常见思路是：
+要在 QEMU 中集成 GPGPU cmodel（cycle model，周期级或功能级的硬件仿真模型，用于在软件层面复现设备的行为和时序特征），常见思路是：
 
 - QEMU 提供设备前端（PCIe/CXL），负责寄存器、队列与中断。
 - cmodel 作为后端，接受命令并模拟执行，返回结果/延迟。

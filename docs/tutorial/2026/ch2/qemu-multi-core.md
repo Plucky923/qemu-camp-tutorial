@@ -8,7 +8,7 @@
 
     本文基于 QEMU **v10.2.0**（tag: [`v10.2.0`](https://gitlab.com/qemu-project/qemu/-/tags/v10.2.0)，commit: `75eb8d57c6b9`）。
 
-QEMU 在系统模式下模拟”多核 CPU”时，核心思想是：**把每个逻辑 CPU 抽象成一个 vCPU，并为其建立执行上下文与线程模型**。
+QEMU 在系统模式下模拟“多核 CPU”时，核心思想是：**把每个逻辑 CPU 抽象成一个 vCPU，并为其建立执行上下文与线程模型**。
 
 !!! tip "概览"
 
@@ -68,6 +68,8 @@ if (total_cpus != maxcpus) {
 ```
 
 这表示 1 个 socket、每个 socket 4 个 core、每 core 1 个 thread，共 4 个 vCPU。
+
+SMP 拓扑定义了 vCPU 的数量和层级结构，但还没有回答"这些 CPU 和内存之间的访问关系是什么"。接下来我们看 UMA 和 NUMA 两种内存架构在 QEMU 中的表现。
 
 ## UMA/NUMA
 
@@ -140,6 +142,8 @@ if (numa_total != ms->ram_size) {
 
 从用户视角看，NUMA/UMA 的配置入口集中在 `-numa` 相关选项，[QEMU 文档][2]给出了完整参数说明与示例。
 
+拓扑和内存节点确定之后，QEMU 需要为每个逻辑 CPU 创建执行上下文和线程。下面我们看 vCPU 的创建流程。
+
 ## vCPU 创建
 
 在系统模式下，vCPU 初始化入口是 `qemu_init_vcpu()`，它会根据 `-smp` 设置线程数，并委托 accel 创建 vCPU 线程：
@@ -158,6 +162,8 @@ void qemu_init_vcpu(CPUState *cpu)
 ```
 
 也就是说：**vCPU 线程模型不是写死的，而是由 accel 决定的**。
+
+`qemu_init_vcpu()` 把线程创建委托给加速器，那么 TCG 加速器具体是如何管理 vCPU 线程的呢？
 
 ## TCG 模型
 
@@ -216,6 +222,8 @@ void rr_start_vcpu_thread(CPUState *cpu)
 
 这也是早期 TCG 的经典模型：一个线程轮流跑多个 vCPU，简单但扩展性差。
 
+MTTCG 让多个 vCPU 线程并行推进，但并行执行不可避免地带来共享数据结构的竞争问题。下面我们看 QEMU 如何在性能和一致性之间取得平衡。
+
 ## 并行与同步
 
 MTTCG 会在以下条件下启用：前后端支持多线程且没有与 `icount` 等功能冲突；如果启用 `-accel tcg,thread=single` 或 `-icount`，会回退到单线程轮转。
@@ -224,7 +232,7 @@ MTTCG 会在以下条件下启用：前后端支持多线程且没有与 `icount
 
 - **热路径无锁**：如 vCPU 的 `tb_jmp_cache` 采用原子方式更新；
 - **必要处加锁**：翻译块生成与跳转回填等关键路径加锁；
-- **设备模型串行化**：通过 BQL 把 MMIO/设备访问串行化。
+- **设备模型串行化**：通过 BQL（Big QEMU Lock，QEMU 的全局互斥锁，用于保护设备模型等非线程安全的共享状态）把 MMIO/设备访问串行化。
 
 这些策略保证了“并行推进 vCPU”与“保持一致性”之间的平衡。
 
