@@ -8,7 +8,7 @@
 
     本文基于 QEMU **v10.2.0**（tag: [`v10.2.0`](https://gitlab.com/qemu-project/qemu/-/tags/v10.2.0)，commit: `75eb8d57c6b9`）。
 
-Rust for QEMU 的核心目标不是”重写 QEMU”，而是让 Rust 设备与现有 C 基础设施协同工作。FFI（Foreign Function Interface）就是这套协同机制的中枢：它既要把 C API 暴露给 Rust，也要把 Rust 设备注册为 QOM 对象、回调与设备入口函数。本文基于将梳理 Rust FFI 在 QEMU 上的实现路径与关键机制。
+Rust for QEMU 的核心目标不是“重写 QEMU”，而是让 Rust 设备与现有 C 基础设施协同工作。FFI（Foreign Function Interface）就是这套协同机制的中枢：它既要把 C API 暴露给 Rust，也要把 Rust 设备注册为 QOM 对象、回调与设备入口函数。本文基于将梳理 Rust FFI 在 QEMU 上的实现路径与关键机制。
 
 !!! tip "概览"
 
@@ -37,9 +37,11 @@ Device/Module (rust/hw/*)
 
 构建入口仍由 Meson 驱动：`configure --enable-rust` 会启用 Rust 构建，随后 Meson 调用 `scripts/cargo_wrapper.py` 驱动 Cargo，保证 Rust 与 C 侧的配置一致（见 `docs/devel/rust.rst`）。
 
+分层架构确定了 Rust 代码与 C 代码的职责边界。最底层的自动绑定是整个 FFI 体系的起点——没有它，Rust 侧就无法调用任何 C API。下面我们看绑定是如何生成的。
+
 ## 绑定生成
 
-QEMU 的 Rust 绑定以 **wrapper.h + bindgen** 的方式生成。每个 Rust crate 通常有一个 `wrapper.h` 指定需要暴露的 C 头文件，然后在对应 `meson.build` 中调用 `rust.bindgen` 生成 `bindings.inc.rs`。
+QEMU 的 Rust 绑定以 **wrapper.h + bindgen（一个 Rust 工具，能自动解析 C 头文件并生成对应的 Rust FFI 绑定代码）** 的方式生成。每个 Rust crate 通常有一个 `wrapper.h` 指定需要暴露的 C 头文件，然后在对应 `meson.build` 中调用 `rust.bindgen` 生成 `bindings.inc.rs`。
 
 以 `pl011` 设备为例，Meson 会这样生成绑定：
 
@@ -71,6 +73,8 @@ typedef enum memory_order { /* ... */ } memory_order;
 
 这保证绑定生成集中、可控，避免把整个 C API 暴露到 Rust 侧。
 
+绑定文件由 Meson 在构建目录生成，但 Rust 代码是通过 Cargo 编译的。两套构建系统之间如何协作？
+
 ## 构建协作
 
 Rust 代码依赖 `bindings.inc.rs`，但该文件由 Meson 在构建目录生成。QEMU 通过 `build.rs` 把生成文件“链接”到 Cargo 输出目录：
@@ -85,6 +89,8 @@ let file = if let Ok(root) = env::var("MESON_BUILD_ROOT") {
 ```
 
 这个机制保证：**Meson 负责生成绑定，Cargo 负责消费绑定**。如果直接运行 `cargo clippy` 或 `cargo fmt`，需要通过 `meson devenv` 或 `MESON_BUILD_ROOT` 配置来找到生成文件。具体可以阅读 QEMU 源码中 `docs/devel/rust.rst` 的文档。
+
+构建协作解决了"绑定文件从哪里来"的问题。接下来我们看 Rust 代码如何安全地使用这些绑定来调用 C API。
 
 ## Rust 调用 C
 
@@ -133,6 +139,8 @@ unsafe extern "C" fn rust_class_init<T: ObjectType + ObjectImpl>(
 ```
 
 这些 `extern "C"` 入口函数就是 Rust 设备进入 QEMU 对象模型的“钩子”。
+
+以上介绍了 Rust 设备注册到 QOM 的入口函数。但在日常运行中，设备还会频繁收到定时器、IRQ、chardev 等回调——这些回调都采用 C 风格的函数指针加 `void* opaque` 模式。下面我们看 QEMU 如何用泛型技巧统一处理这类回调桥接。
 
 ## 回调机制
 

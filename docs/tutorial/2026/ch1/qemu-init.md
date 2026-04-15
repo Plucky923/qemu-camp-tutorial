@@ -47,7 +47,7 @@ qemu-system-riscv64 -M virt -s -S -nographic
 
 为了让后续的 gdb 调试更顺畅，建议先准备好带调试符号的 QEMU 环境。若你已经完成导学阶段，可以直接参考[从源码开始构建 QEMU](../ch0/qemu-dev-env.md)中的步骤自行编译；若你使用的是发行版提供的 QEMU 二进制包，也至少要额外安装与当前版本严格匹配的 `dbgsym`（或对应的 debug symbols）包。否则在设置断点、查看调用栈和单步跟踪时，gdb 往往只能看到不完整甚至错位的符号信息，分析体验会大打折扣。
 
-virt Machine 是一个 QEMU 的 QOM `Object`（下一章节会讲），我们可以在它的 class 初始化或者对象实例化的源码位置，打一个断点，来观察调用栈。这里我们先搜索一下 virt Machine 源码里关于 typeinfo 相关的代码：
+virt Machine 是一个 QEMU 的 QOM `Object`（QOM 即 QEMU Object Model，是 QEMU 用纯 C 实现的面向对象框架，用来统一管理设备、Machine 等组件的类型注册、继承和实例化——后续章节会详细讲解），我们可以在它的 class 初始化或者对象实例化的源码位置，打一个断点，来观察调用栈。这里我们先搜索一下 virt Machine 源码里关于 TypeInfo（QOM 中描述类型元信息的结构体，包含类型名、父类、初始化函数等字段）相关的代码：
 
 ```c
 static const TypeInfo virt_machine_typeinfo = {
@@ -126,7 +126,7 @@ Thread 1 "qemu-system-ris" hit Breakpoint 2, virt_machine_instance_init (obj=0x5
 main() → qemu_init() → qemu_create_machine()
 ```
 
-然后先创建 class，然后再实例化 QOM 对象，这和前面讲解 QOM 给出的流程一致。
+然后先创建 class（即初始化类型的元信息，例如注册回调函数和属性），然后再实例化 QOM 对象（分配实例内存并调用 `instance_init`），这和后续讲解 QOM 给出的流程一致。
 
 另外我们还比较关注这两个函数内部的实现，这时候可以进一步阅读代码：
 
@@ -517,6 +517,8 @@ void main_loop_wait(int nonblocking)
 把主循环理解成「事件泵」，就很容易把这段逻辑和设备的定时器、BH（Bottom Half，延迟执行的回调函数，用于将耗时操作推迟到安全的时机执行）以及 monitor 命令联系起来。
 
 ### IO 线程
+
+主循环承担了全局事件调度的职责，但如果所有 I/O 处理都堆积在主线程中，高频的块设备或网络事件会拖慢定时器和 monitor 等其他任务的响应。为了解决这个问题，QEMU 引入了可选的 IO 线程，将 I/O 密集的设备从主循环中分离出去。
 
 IO 线程用于把 I/O 事件从主线程拆出去。它是一个 QOM 对象（`TYPE_IOTHREAD`），内部维护自己的 `AioContext`（异步 I/O 事件循环上下文，管理文件描述符监听、定时器和 BH 调度）与 `GMainContext`。核心运行循环在 `iothread_run()`：
 

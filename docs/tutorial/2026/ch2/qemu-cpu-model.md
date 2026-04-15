@@ -19,7 +19,7 @@ RISC-V 这套实现的核心结构有四个：
 
 - `RISCVCPU`：具体 CPU 实例，对应一个 hart。
 - `RISCVCPUClass`：CPU 类型对应的类对象，其中保存着该型号的默认定义。
-- `RISCVCPUDef`：某个 CPU 型号的默认”蓝图”。
+- `RISCVCPUDef`：某个 CPU 型号的默认“蓝图”。
 - `RISCVCPUConfig`：扩展开关和数值型配置项，最终保存在 CPU 实例里。
 
 !!! tip "概览"

@@ -8,7 +8,7 @@
 
     本文基于 QEMU **v10.2.0**（tag: [`v10.2.0`](https://gitlab.com/qemu-project/qemu/-/tags/v10.2.0)，commit: `75eb8d57c6b9`）。
 
-Rust for QEMU 的目标是让 Rust 设备与现有 C 基础设施协同工作。本文聚焦”如何用 Rust 建模外设”，并以 I2C 设备与 GPIO 设备（PCF8574）作为示例，说明从构建接入到设备行为实现的完整链路，同时补充 SysBus 的 Rust 封装要点。
+Rust for QEMU 的目标是让 Rust 设备与现有 C 基础设施协同工作。本文聚焦“如何用 Rust 建模外设”，并以 I2C 设备与 GPIO 设备（PCF8574）作为示例，说明从构建接入到设备行为实现的完整链路，同时补充 SysBus 的 Rust 封装要点。
 
 !!! tip "概览"
 
@@ -40,6 +40,8 @@ Kconfig/Meson/Cargo
 
 Rust 设备通常与 C 设备并存，Rust 版本启用失败时仍可回退到 C 版本，这样更利于逐步迁移与验证。
 
+构建接入解决了"Rust 代码如何编译进 QEMU"的问题。接下来我们看设备模型本身如何在 Rust 侧实现——首先是 QOM 对象模型的对接。
+
 ## QOM 实现
 
 QOM 是 QEMU 的面向对象建模基础。Rust 侧通过 `ObjectType`/`ObjectImpl` trait 与 `qom_isa!` 宏对齐 C 端 TypeInfo 的继承关系，并要求设备结构体满足 `#[repr(C)]` 与 `ParentField<Parent>` 的布局约束。
@@ -68,6 +70,8 @@ impl ObjectImpl for MyDev {
 
 在 `rust/qom/src/qom.rs` 中，QOM 回调通过 `extern "C"` 泛型桥接函数（如 `rust_class_init`、`rust_instance_init`）接入 C 侧的 class_init/instance_init。这样 Rust 设备可以像 C 设备一样注册到 QOM 树中。
 
+QOM 对接让 Rust 设备能够注册到 QEMU 的类型系统中。但设备还需要响应客户机的 MMIO 访问——这就需要 MemoryRegion 的 Rust 封装。
+
 ## MemoryRegion 实现
 
 地址空间抽象由 `MemoryRegion` 负责。Rust 侧在 `rust/system/src/memory.rs` 中提供 `MemoryRegion` 与 `MemoryRegionOpsBuilder`，用来注册 MMIO 回调并接入 C 侧 `memory_region_init_io`。
@@ -86,6 +90,8 @@ MemoryRegion::init_io(&mut self.mmio, &ops, "mydev-mmio", 0x1000);
 
 其中 `MemoryRegionOpsBuilder` 会把 Rust 函数转换为 `extern "C"` 回调，并通过 `FnCall` 把 `*mut c_void` 转回 Rust 引用。`MemoryRegion` 本身也是 QOM 对象，因此能被 SysBus 或主板层级管理与映射。
 
+MemoryRegion 封装为 SysBus 类设备提供了 MMIO 能力。对于挂载在总线上的设备（如 I2C、SPI），还需要相应的总线封装。下面以 I2C 设备为例说明。
+
 ## I2C 设备
 
 在 qemu-rust 邮件列表的补丁中，I2C 设备的实现路径被拆分为两步：先补 I2C 总线与从设备的 Rust 封装，再实现具体设备（如 PCF8574）。典型结构包含：
@@ -94,6 +100,8 @@ MemoryRegion::init_io(&mut self.mmio, &ops, "mydev-mmio", 0x1000);
 - **I2C 从设备接口**：提供 `send`/`recv` 与地址配置方法，将 C 侧 I2C 回调桥接到 Rust。
 
 因此，I2C 设备的实现重点并不在“设备本身”，而是先建立 **Rust 的 I2C Bus/Slave 基础设施**，让后续设备复用这一层能力。
+
+有了 I2C 总线的 Rust 封装，就可以在此基础上实现具体的 I2C 从设备了。PCF8574 是一个典型的 I2C GPIO 扩展器，很适合作为第一个 Rust I2C 设备的示例。
 
 ## GPIO 设备
 
@@ -106,6 +114,8 @@ PCF8574 是典型的 I2C GPIO 扩展器：通过 I2C 数据字节把 8 路 GPIO 
 
 这种设备很好地展示了 Rust 设备与既有 GPIO/IRQ 基础设施的配合方式，也验证了 I2C Rust 封装的可用性。
 
+PCF8574 展示了 I2C 总线设备的实现方式。对于直接挂载在系统总线上的设备，QEMU 提供了 SysBus 抽象。下面我们看 Rust 侧的 SysBus 封装要点。
+
 ## SysBus 封装
 
 SysBus 是 QEMU 常见的板级外设接口。Rust 侧在 `rust/hw/core/src/sysbus.rs` 提供 `SysBusDevice` 封装，并通过 `SysBusDeviceMethods` 暴露关键能力：
@@ -116,7 +126,7 @@ SysBus 是 QEMU 常见的板级外设接口。Rust 侧在 `rust/hw/core/src/sysb
 - `connect_irq`：连接中断线
 - `sysbus_realize`：触发设备 realize
 
-这些操作都需要在 BQL（Big QEMU Lock）持有时进行，以保证并发访问安全。
+这些操作都需要在 BQL（Big QEMU Lock，QEMU 的全局互斥锁，保护设备模型等非线程安全的共享状态）持有时进行，以保证并发访问安全。
 
 ## 建模示意
 
