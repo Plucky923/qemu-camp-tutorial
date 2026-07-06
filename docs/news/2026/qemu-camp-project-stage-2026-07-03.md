@@ -2,7 +2,7 @@
 
 !!! note "主要贡献者"
 
-    - 通讯：[@zevorn](https://github.com/zevorn)
+    - 通讯：[@bbbbbq](https://github.com/bbbbbq)
 
 2026 年 7 月 3 日，GTOC 发布 QEMU 训练营 2026 项目阶段启动消息。近 40 名学员在完成导学阶段、基础阶段和专业阶段后，进入本期训练营最贴近真实工程实践的项目阶段。
 
