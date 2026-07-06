@@ -3,7 +3,7 @@
     "max_runs_per_repo": 6,
     "workers": 4,
     "max_diagnostics_per_page": 40,
-    "snapshot_path": "docs/generated/leaderboards/2026.json",
+    "snapshot_path": ".cache/leaderboards/2026.json",
     "stages": [
         {
             "key": "basic",

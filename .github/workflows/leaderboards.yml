@@ -41,15 +41,46 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Restore leaderboard snapshot cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/leaderboards
+          key: leaderboards-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            leaderboards-${{ github.ref_name }}-
+            leaderboards-
+
+      - name: Seed leaderboard snapshot cache
+        run: |
+          snapshot=".cache/leaderboards/2026.json"
+          legacy_snapshot="docs/generated/leaderboards/2026.json"
+          mkdir -p "$(dirname "$snapshot")"
+
+          if [ -s "$snapshot" ]; then
+            exit 0
+          fi
+
+          if [ -s "$legacy_snapshot" ]; then
+            cp "$legacy_snapshot" "$snapshot"
+            exit 0
+          fi
+
+          legacy_commit="$(git log --diff-filter=AM --format=%H -- "$legacy_snapshot" | head -n 1 || true)"
+          if [ -n "$legacy_commit" ]; then
+            git show "$legacy_commit:$legacy_snapshot" > "$snapshot" || rm -f "$snapshot"
+          fi
+
       - name: Generate leaderboards
         env:
           LEADERBOARD_GITHUB_TOKEN: ${{ secrets.LEADERBOARD_GITHUB_TOKEN }}
+          LEADERBOARD_GITHUB_REQUESTS_PER_MINUTE: "45"
+          LEADERBOARD_GITHUB_RETRIES: "5"
         run: python scripts/leaderboards/update_leaderboards.py --config scripts/leaderboards/config.json --fail-on-collection-errors
 
       - name: Check for changes
         id: changes
         run: |
-          if [ -z "$(git status --porcelain -- docs/generated/leaderboards docs/leaderboards)" ]; then
+          if [ -z "$(git status --porcelain -- docs/leaderboards)" ]; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
@@ -61,7 +92,7 @@ jobs:
           git switch -c "$UPDATE_BRANCH"
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs/generated/leaderboards docs/leaderboards
+          git add docs/leaderboards
           git commit -s -m "docs: update leaderboards"
 
       - name: Push update branch
@@ -92,7 +123,7 @@ jobs:
                 --base "$BASE_BRANCH" \
                 --head "$UPDATE_BRANCH" \
                 --title "docs: update leaderboards" \
-                --body $'Refresh the generated 2026 leaderboard Markdown pages and JSON snapshot.\n\nAfter this PR merges, the Documentation workflow renders the updated site.'
+                --body $'Refresh the generated 2026 leaderboard Markdown pages.\n\nAfter this PR merges, the Documentation workflow renders the updated site.'
             )"
             pr_number="${pr_url##*/}"
           fi
@@ -100,9 +131,52 @@ jobs:
           echo "number=$pr_number" >> "$GITHUB_OUTPUT"
           echo "Pull request #$pr_number is ready for auto-merge."
 
-      - name: Enable auto-merge
+      - name: Merge generated pull request
         if: github.ref_name == github.event.repository.default_branch && steps.changes.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.LEADERBOARD_GITHUB_TOKEN }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
-        run: gh pr merge "$PR_NUMBER" --rebase --auto --delete-branch
+        run: |
+          set +e
+          merge_output="$(gh pr merge "$PR_NUMBER" --rebase --auto --delete-branch 2>&1)"
+          merge_status=$?
+          set -e
+
+          if [ "$merge_status" -eq 0 ]; then
+            echo "$merge_output"
+            exit 0
+          fi
+
+          if ! echo "$merge_output" | grep -q "Auto merge is not allowed"; then
+            echo "$merge_output" >&2
+            exit "$merge_status"
+          fi
+
+          echo "::warning::Repository auto-merge is disabled; waiting for PR checks before direct merge."
+          for attempt in {1..30}; do
+            set +e
+            checks_output="$(gh pr checks "$PR_NUMBER" --watch --interval 10 --fail-fast 2>&1)"
+            checks_status=$?
+            set -e
+
+            if [ "$checks_status" -eq 0 ]; then
+              echo "$checks_output"
+              break
+            fi
+
+            if echo "$checks_output" | grep -qi "no checks"; then
+              echo "Checks are not attached yet; retrying in 10s ($attempt/30)."
+              sleep 10
+              continue
+            fi
+
+            echo "$checks_output" >&2
+            exit "$checks_status"
+          done
+
+          if [ "${checks_status:-1}" -ne 0 ]; then
+            echo "::error::PR checks were not created before the retry timeout."
+            exit 1
+          fi
+
+          gh pr merge "$PR_NUMBER" --rebase --delete-branch

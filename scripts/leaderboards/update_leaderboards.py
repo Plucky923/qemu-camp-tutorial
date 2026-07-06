@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import tempfile
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
@@ -90,6 +91,56 @@ class GitHubError(RuntimeError):
         super().__init__(f"GitHub API error {status or 'unknown'} for {path}: {message}")
 
 
+class GitHubRateLimiter:
+    def __init__(
+        self,
+        requests_per_minute: float,
+        clock=time.monotonic,
+        sleeper=time.sleep,
+    ):
+        self.interval = 0.0 if requests_per_minute <= 0 else 60.0 / requests_per_minute
+        self.clock = clock
+        self.sleeper = sleeper
+        self.lock = threading.Lock()
+        self.next_request_at = 0.0
+        self.paused_until = 0.0
+
+    def wait(self) -> None:
+        if self.interval <= 0:
+            return
+
+        while True:
+            with self.lock:
+                now = self.clock()
+                if self.paused_until > now:
+                    wait_seconds = self.paused_until - now
+                else:
+                    wait_seconds = max(self.next_request_at - now, 0.0)
+                    self.next_request_at = max(self.next_request_at, now) + self.interval
+                    break
+            self.sleeper(wait_seconds)
+        if wait_seconds > 0:
+            self.sleeper(wait_seconds)
+
+    def pause(self, seconds: float) -> None:
+        if seconds <= 0:
+            return
+        with self.lock:
+            self.paused_until = max(self.paused_until, self.clock() + seconds)
+            self.next_request_at = max(self.next_request_at, self.paused_until)
+
+
+def github_requests_per_minute() -> float:
+    raw_value = os.environ.get("LEADERBOARD_GITHUB_REQUESTS_PER_MINUTE", "45")
+    try:
+        return float(raw_value)
+    except ValueError:
+        return 45.0
+
+
+SHARED_GITHUB_RATE_LIMITER = GitHubRateLimiter(github_requests_per_minute())
+
+
 class StripAuthRedirectHandler(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
@@ -105,13 +156,43 @@ class StripAuthRedirectHandler(HTTPRedirectHandler):
 
 
 class GitHubClient:
-    def __init__(self, token: str | None, retries: int | None = None):
+    def __init__(
+        self,
+        token: str | None,
+        retries: int | None = None,
+        rate_limiter: GitHubRateLimiter | None = None,
+    ):
         self.token = token
         self.retries = max(1, retries if retries is not None else int(os.environ.get("LEADERBOARD_GITHUB_RETRIES", "3")))
+        self.max_rate_limit_sleep = max(1, int(os.environ.get("LEADERBOARD_GITHUB_MAX_RATE_LIMIT_SLEEP", "3700")))
+        self.rate_limiter = rate_limiter or SHARED_GITHUB_RATE_LIMITER
         self.opener = build_opener(StripAuthRedirectHandler)
 
     def _retry_sleep(self, attempt: int) -> None:
         time.sleep(min(2 ** (attempt - 1), 8))
+
+    def _rate_limit_sleep_seconds(self, exc: HTTPError, message: str) -> float | None:
+        headers = exc.headers
+        retry_after = headers.get("Retry-After")
+        if retry_after:
+            try:
+                return min(float(retry_after), self.max_rate_limit_sleep)
+            except ValueError:
+                return None
+
+        remaining = headers.get("X-RateLimit-Remaining")
+        reset_at = headers.get("X-RateLimit-Reset")
+        message_lower = message.lower()
+        if exc.code not in {403, 429}:
+            return None
+        if remaining != "0" and "rate limit" not in message_lower and "secondary rate" not in message_lower:
+            return None
+        if reset_at:
+            try:
+                return min(max(float(reset_at) - time.time() + 2.0, 1.0), self.max_rate_limit_sleep)
+            except ValueError:
+                return None
+        return min(60.0, self.max_rate_limit_sleep)
 
     def _request(self, path_or_url: str, params: dict[str, Any] | None = None) -> bytes:
         if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
@@ -131,6 +212,7 @@ class GitHubClient:
 
         for attempt in range(1, self.retries + 1):
             try:
+                self.rate_limiter.wait()
                 with self.opener.open(Request(url, headers=headers), timeout=60) as response:
                     return response.read()
             except HTTPError as exc:
@@ -140,6 +222,16 @@ class GitHubClient:
                 except json.JSONDecodeError:
                     message = detail
                 error = GitHubError(exc.code, path_or_url, message)
+                rate_limit_sleep = self._rate_limit_sleep_seconds(exc, message)
+                if rate_limit_sleep is not None and attempt < self.retries:
+                    print(
+                        f"GitHub API rate limited for {path_or_url}; "
+                        f"waiting {rate_limit_sleep:.0f}s before retry {attempt + 1}/{self.retries}",
+                        file=sys.stderr,
+                    )
+                    self.rate_limiter.pause(rate_limit_sleep)
+                    time.sleep(rate_limit_sleep)
+                    continue
                 if exc.code >= 500 and attempt < self.retries:
                     self._retry_sleep(attempt)
                     continue
@@ -229,6 +321,12 @@ def load_config(path: Path) -> dict[str, Any]:
 def parse_time(value: str | None) -> datetime:
     if not value:
         return datetime.max.replace(tzinfo=timezone.utc)
+    display_time_match = re.fullmatch(r"(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) UTC", value)
+    if display_time_match:
+        try:
+            return datetime.strptime(value, "%Y-%m-%d %H:%M UTC").replace(tzinfo=timezone.utc)
+        except ValueError:
+            return datetime.max.replace(tzinfo=timezone.utc)
     normalized = value.replace("Z", "+00:00")
     try:
         parsed = datetime.fromisoformat(normalized)
@@ -554,7 +652,16 @@ def cached_record_matches_job(record: LeaderboardRecord, run: dict[str, Any], jo
         or run_time
         or ""
     )
-    return bool(record.run_time) and record.run_time == run_time and record.completion_time == completion_time
+    if not record.run_time:
+        return False
+    if record.run_time != run_time and format_time(record.run_time) != format_time(run_time):
+        return False
+    if not record.completion_time:
+        return True
+    return (
+        record.completion_time == completion_time
+        or format_time(record.completion_time) == format_time(completion_time)
+    )
 
 
 def direction_matches_run(direction: Direction, run: dict[str, Any]) -> bool:
@@ -906,6 +1013,14 @@ def public_record(record: dict[str, Any]) -> dict[str, Any]:
     return {field: record[field] for field in PUBLIC_RECORD_FIELDS if field in record}
 
 
+def comparable_public_record(record: dict[str, Any]) -> dict[str, Any]:
+    comparable = public_record(record)
+    comparable.pop("completion_time", None)
+    if "run_time" in comparable:
+        comparable["run_time"] = format_time(comparable["run_time"])
+    return comparable
+
+
 def public_direction(direction: dict[str, Any]) -> dict[str, Any]:
     return {field: direction[field] for field in PUBLIC_DIRECTION_FIELDS if field in direction}
 
@@ -929,6 +1044,7 @@ def snapshot_without_generated_at(snapshot: dict[str, Any]) -> dict[str, Any]:
     metadata = dict(cleaned.get("metadata", {}))
     metadata.pop("generated_at", None)
     cleaned["metadata"] = metadata
+    cleaned["ranked"] = [comparable_public_record(record) for record in snapshot.get("ranked", [])]
     return cleaned
 
 
@@ -1041,11 +1157,74 @@ def load_snapshot_if_exists(path: Path) -> dict[str, Any] | None:
     return load_snapshot(path)
 
 
+def parse_score(value: str) -> float | None:
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def load_snapshot_from_rendered_pages(config: dict[str, Any], root: Path) -> dict[str, Any] | None:
+    ranked: list[dict[str, Any]] = []
+    generated_at = ""
+    for stage in config["stages"]:
+        output_dir = root / stage["output_dir"]
+        for direction in stage["directions"]:
+            page = output_dir / direction.page
+            if not page.exists():
+                continue
+            for line in page.read_text(encoding="utf-8").splitlines():
+                if line.startswith("每天刷新一次｜快照生成时间：") and not generated_at:
+                    display_time = line.split("：", 1)[1].strip()
+                    parsed = parse_time(display_time)
+                    if parsed != datetime.max.replace(tzinfo=timezone.utc):
+                        generated_at = parsed.isoformat().replace("+00:00", "Z")
+                if not line.startswith("| ") or " | " not in line:
+                    continue
+                columns = [column.strip() for column in line.strip("|").split("|")]
+                if len(columns) != 5 or columns[0] in {"排名", "---"}:
+                    continue
+                score = parse_score(columns[2])
+                total_score = parse_score(columns[3])
+                if score is None or total_score is None:
+                    continue
+                try:
+                    rank = int(columns[0])
+                except ValueError:
+                    rank = None
+                ranked.append({
+                    "stage": direction.stage,
+                    "direction": direction.key,
+                    "rank": rank,
+                    "github_id": columns[1],
+                    "score": score,
+                    "total_score": total_score,
+                    "run_time": columns[4],
+                    "completion_time": "",
+                })
+    if not ranked:
+        return None
+    return {
+        "metadata": {"generated_at": generated_at},
+        "directions": [public_direction(asdict(direction)) for direction in config["directions"]],
+        "ranked": ranked,
+        "diagnostics": [],
+    }
+
+
+def load_previous_snapshot(config: dict[str, Any], root: Path) -> dict[str, Any] | None:
+    snapshot = load_snapshot_if_exists(root / config["snapshot_path"])
+    if snapshot:
+        return snapshot
+    return load_snapshot_from_rendered_pages(config, root)
+
+
 def record_identity(stage: str, direction: str, github_id: str) -> tuple[str, str, str]:
     return stage, direction, github_id.lower()
 
 
 def snapshot_record(item: dict[str, Any]) -> LeaderboardRecord:
+    completion_time = str(item["completion_time"]) if "completion_time" in item else str(item.get("run_time") or "")
     return LeaderboardRecord(
         stage=str(item["stage"]),
         direction=str(item["direction"]),
@@ -1054,7 +1233,7 @@ def snapshot_record(item: dict[str, Any]) -> LeaderboardRecord:
         score=float(item["score"]),
         total_score=float(item["total_score"]),
         run_time=str(item.get("run_time") or ""),
-        completion_time=str(item.get("completion_time") or item.get("run_time") or ""),
+        completion_time=completion_time,
         run_url="",
         run_id=0,
         job_name="",
@@ -1123,10 +1302,7 @@ def diagnostic_allows_snapshot_preservation(diagnostic: Diagnostic) -> bool:
     if "/logs" in reason and ("404" in reason or "410" in reason or "not found" in reason):
         return True
     if diagnostic.kind != "error":
-        return reason in {
-            "no verified opencamp score payload in matching job log",
-            "no parseable payload in inspected runs",
-        }
+        return True
     if "expired" in reason or "gone" in reason:
         return True
     return False
@@ -1177,6 +1353,32 @@ def preserve_snapshot_records(
 
 
 def self_test() -> None:
+    fake_now = 0.0
+    sleeps: list[float] = []
+
+    def fake_clock() -> float:
+        return fake_now
+
+    def fake_sleep(seconds: float) -> None:
+        nonlocal fake_now
+        sleeps.append(seconds)
+        fake_now += seconds
+
+    limiter = GitHubRateLimiter(60, clock=fake_clock, sleeper=fake_sleep)
+    limiter.wait()
+    limiter.wait()
+    limiter.wait()
+    assert sleeps == [1.0, 1.0]
+    limiter.pause(5)
+    limiter.wait()
+    assert sleeps[-1] == 5.0
+
+    reset_headers = {"X-RateLimit-Remaining": "0", "X-RateLimit-Reset": str(int(time.time() + 10))}
+    rate_limit_error = HTTPError("https://api.github.com/rate", 403, "Forbidden", reset_headers, None)
+    rate_limit_client = GitHubClient(None, rate_limiter=GitHubRateLimiter(0))
+    reset_sleep = rate_limit_client._rate_limit_sleep_seconds(rate_limit_error, "API rate limit exceeded")
+    assert reset_sleep is not None and 1 <= reset_sleep <= 12
+
     untrusted_log = """
 2026-06-15T15:18:44.1483905Z {
 2026-06-15T15:18:44.1484234Z   "channel": "github",
@@ -1401,9 +1603,19 @@ def self_test() -> None:
         changed_content["ranked"][0]["score"] = float(changed_content["ranked"][0]["score"]) + 1
         assert leaderboard_content_changed(changed_content, public)
         page = (root / "pages" / "cpu.md").read_text(encoding="utf-8")
-        assert "qemu-camp-2026-exper" not in page.split("| GitHub ID |", 1)[-1].split("完整快照", 1)[0]
+        assert "qemu-camp-2026-exper" not in page.split("| GitHub ID |", 1)[-1]
         assert "bob" in page and "alice" in page
         assert "每天刷新一次｜快照生成时间：" in page
+        rendered_snapshot = load_snapshot_from_rendered_pages(config, root)
+        assert rendered_snapshot is not None
+        assert {item["github_id"] for item in rendered_snapshot["ranked"]} == {"alice", "bob"}
+        assert not leaderboard_content_changed(snapshot, rendered_snapshot)
+        rendered_records = {item["github_id"]: snapshot_record(item) for item in rendered_snapshot["ranked"]}
+        assert cached_record_matches_job(
+            rendered_records["alice"],
+            {"run_started_at": "2026-06-15T02:00:00Z", "created_at": "2026-06-15T02:00:00Z"},
+            {"completed_at": "2026-06-15T02:10:00Z"},
+        )
 
         current_records, remaining_diagnostics, preserved = preserve_snapshot_records(
             config,
@@ -1449,6 +1661,23 @@ def self_test() -> None:
                     "qemu-camp-2026-exper-bob",
                     "https://github.com/gevico/repo-bob",
                     "cpu",
+                    "workflow does not reference the configured OpenCamp course secret",
+                )
+            ],
+            public,
+        )
+        assert preserved == 1
+        assert remaining_diagnostics == []
+        assert {record.github_id for record in current_records} == {"alice", "bob"}
+
+        current_records, remaining_diagnostics, preserved = preserve_snapshot_records(
+            config,
+            [later],
+            [
+                Diagnostic(
+                    "qemu-camp-2026-exper-bob",
+                    "https://github.com/gevico/repo-bob",
+                    "cpu",
                     "no verified OpenCamp score payload in matching job log",
                 )
             ],
@@ -1471,9 +1700,9 @@ def self_test() -> None:
             ],
             public,
         )
-        assert preserved == 0
-        assert len(remaining_diagnostics) == 1
-        assert {record.github_id for record in current_records} == {"alice"}
+        assert preserved == 1
+        assert remaining_diagnostics == []
+        assert {record.github_id for record in current_records} == {"alice", "bob"}
 
     class FakeGitHubClient:
         def __init__(
@@ -1805,7 +2034,7 @@ def main() -> int:
         snapshot = load_snapshot(Path(args.render_only))
         diagnostics: list[Diagnostic] = []
     else:
-        previous_snapshot = load_snapshot_if_exists(root / config["snapshot_path"])
+        previous_snapshot = load_previous_snapshot(config, root)
         records, diagnostics = collect(
             config,
             args.repo_limit,
