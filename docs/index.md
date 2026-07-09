@@ -598,8 +598,12 @@ body:has(.home-page) .md-content__inner > h1:first-child {
   <section class="home-section">
     <div class="home-section__head">
       <h2>最新动态</h2>
-      <a href="news/2026/qemu-camp-meetup-2026-04-05/">更多</a>
+      <a href="news/2026/qemu-camp-project-stage-2026-07-03/">更多</a>
     </div>
+    <a class="home-list-item" href="news/2026/qemu-camp-project-stage-2026-07-03/">
+      <span>QEMU 训练营 2026 项目阶段正式开启</span>
+      <small>2026.07.03</small>
+    </a>
     <a class="home-list-item" href="news/2026/qemu-camp-meetup-2026-04-05/">
       <span>启航！QEMU 训练营 2026 开营，深耕虚拟化与体系结构教学新征程</span>
       <small>2026.04.05</small>
@@ -619,10 +623,6 @@ body:has(.home-page) .md-content__inner > h1:first-child {
     <a class="home-list-item" href="news/2026/qemu-camp-meetup-2026-01-30/">
       <span>QEMU 训练营 2026 第一次工作推进会顺利召开，各项筹备有序落地</span>
       <small>2026.01.30</small>
-    </a>
-    <a class="home-list-item" href="news/2026/qemu-camp-update-2026-01-07/">
-      <span>关于 QEMU 训练营 2026 正式启动筹备工作的通知</span>
-      <small>2026.01.07</small>
     </a>
   </section>
 

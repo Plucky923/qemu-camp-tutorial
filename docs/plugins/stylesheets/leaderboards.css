@@ -1,0 +1,286 @@
+/* QEMU camp leaderboards */
+.qemu-leaderboard-tabs {
+  border-bottom: 1px solid var(--md-default-fg-color--lightest, #e8e8e8);
+  display: flex;
+  gap: 0.25rem;
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+.qemu-leaderboard-tabs__item {
+  border-bottom: 0.13rem solid transparent;
+  color: var(--md-default-fg-color);
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 650;
+  min-height: 2.6rem;
+  padding: 0.55rem 0.85rem 0.45rem;
+  text-decoration: none !important;
+}
+
+.qemu-leaderboard-tabs__item:hover,
+.qemu-leaderboard-tabs__item:focus-visible {
+  color: var(--md-primary-fg-color, #2196f3);
+}
+
+.qemu-leaderboard-tabs__item.is-active {
+  border-bottom-color: var(--md-primary-fg-color, #2196f3);
+  color: var(--md-primary-fg-color, #2196f3);
+}
+
+.qemu-leaderboard {
+  --leaderboard-primary: var(--md-primary-fg-color, #2196f3);
+  --leaderboard-primary-soft: rgba(33, 150, 243, 0.12);
+  --leaderboard-card: var(--md-default-bg-color, #ffffff);
+  --leaderboard-border: var(--md-default-fg-color--lightest, #e8e8e8);
+  --leaderboard-muted: var(--md-default-fg-color--light, #666666);
+  --leaderboard-row: rgba(33, 150, 243, 0.08);
+  --leaderboard-rank-column: 3.2rem;
+  --leaderboard-rank-align-width: 2.1rem;
+  --leaderboard-name-column: minmax(0, 1fr);
+  --leaderboard-score-column: minmax(5.8rem, 0.32fr);
+  background: var(--leaderboard-card);
+  border: 1px solid var(--leaderboard-border);
+  border-radius: 0.4rem;
+  box-shadow: 0 0.2rem 0.7rem rgba(0, 0, 0, 0.05);
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+.qemu-leaderboard__header {
+  align-items: center;
+  border-bottom: 1px solid var(--leaderboard-border);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+}
+
+.qemu-leaderboard__title {
+  color: var(--md-default-fg-color);
+  font-size: 0.95rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.qemu-leaderboard__subtitle,
+.qemu-leaderboard__updated {
+  color: var(--leaderboard-muted);
+  font-size: 0.64rem;
+  line-height: 1.5;
+}
+
+.qemu-leaderboard__updated {
+  text-align: right;
+}
+
+.qemu-leaderboard__metrics {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0.85rem 1rem 0;
+}
+
+.qemu-leaderboard__metric {
+  background: var(--leaderboard-row);
+  border-radius: 0.35rem;
+  min-height: 3.7rem;
+  padding: 0.75rem 0.85rem;
+}
+
+.qemu-leaderboard__metric--primary {
+  background: var(--leaderboard-primary);
+}
+
+.qemu-leaderboard__metric--primary .qemu-leaderboard__metric-value,
+.qemu-leaderboard__metric--primary .qemu-leaderboard__metric-label {
+  color: #ffffff;
+}
+
+.qemu-leaderboard__metric-value,
+.qemu-leaderboard__metric-label {
+  display: block;
+}
+
+.qemu-leaderboard__metric-value {
+  color: var(--md-default-fg-color);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.qemu-leaderboard__metric-label {
+  color: var(--leaderboard-muted);
+  font-size: 0.64rem;
+  line-height: 1.5;
+  margin-top: 0.35rem;
+}
+
+.qemu-leaderboard__scroll {
+  border: 1px solid var(--leaderboard-border);
+  border-radius: 0.35rem;
+  margin: 1rem;
+  max-height: 31rem;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.qemu-leaderboard__list-head,
+.qemu-leaderboard__row {
+  align-items: center;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: var(--leaderboard-rank-column) var(--leaderboard-name-column) var(--leaderboard-score-column);
+}
+
+.qemu-leaderboard__list-head {
+  background: var(--leaderboard-card);
+  border-bottom: 1px solid var(--leaderboard-border);
+  color: var(--leaderboard-muted);
+  font-size: 0.62rem;
+  font-weight: 750;
+  line-height: 1.4;
+  min-width: 26rem;
+  padding: 0.55rem 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.qemu-leaderboard__list-head span:first-child {
+  justify-self: start;
+  text-align: center;
+  width: var(--leaderboard-rank-align-width);
+}
+
+.qemu-leaderboard .qemu-leaderboard__rows {
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin: 0 !important;
+  margin-inline-start: 0 !important;
+  min-width: 26rem;
+  padding: 0 !important;
+  padding-inline-start: 0 !important;
+}
+
+.qemu-leaderboard .qemu-leaderboard__row {
+  border-bottom: 1px solid var(--leaderboard-border);
+  margin: 0 !important;
+  margin-inline-start: 0 !important;
+  min-height: 2.8rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.qemu-leaderboard__row:last-child {
+  border-bottom: 0;
+}
+
+.qemu-leaderboard__row--top {
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.1), transparent);
+}
+
+.qemu-leaderboard__rank {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  color: var(--md-default-fg-color);
+  display: inline-flex;
+  font-size: 0.68rem;
+  font-weight: 800;
+  height: 1.45rem;
+  justify-self: start;
+  justify-content: center;
+  line-height: 1;
+  margin-left: calc((var(--leaderboard-rank-align-width) - 1.45rem) / 2);
+  width: 1.45rem;
+}
+
+.qemu-leaderboard__row:nth-child(-n+3) .qemu-leaderboard__rank {
+  background: var(--md-default-fg-color);
+  color: var(--md-default-bg-color);
+}
+
+.qemu-leaderboard__name,
+.qemu-leaderboard__time {
+  color: var(--md-default-fg-color);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qemu-leaderboard__name {
+  font-weight: 700;
+}
+
+.qemu-leaderboard__name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.qemu-leaderboard__name a:hover,
+.qemu-leaderboard__name a:focus-visible {
+  color: var(--leaderboard-primary);
+  text-decoration: underline;
+}
+
+.qemu-leaderboard__score {
+  display: grid;
+  gap: 0.28rem;
+  min-width: 0;
+}
+
+.qemu-leaderboard__score strong {
+  color: var(--md-default-fg-color);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.qemu-leaderboard__score small {
+  color: var(--leaderboard-muted);
+  font-size: 0.62rem;
+  margin-left: 0.1rem;
+}
+
+.qemu-leaderboard__bar {
+  background: var(--leaderboard-primary-soft);
+  border-radius: 999px;
+  display: block;
+  height: 0.42rem;
+  overflow: hidden;
+}
+
+.qemu-leaderboard__bar span {
+  background: linear-gradient(90deg, var(--leaderboard-primary), #64b5f6);
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  min-width: 0.12rem;
+}
+
+.qemu-leaderboard--empty {
+  color: var(--leaderboard-muted);
+  padding: 1rem;
+}
+
+@media screen and (max-width: 52rem) {
+  .qemu-leaderboard__header {
+    align-items: flex-start;
+    display: block;
+  }
+
+  .qemu-leaderboard__updated {
+    margin-top: 0.35rem;
+    text-align: left;
+  }
+
+  .qemu-leaderboard__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .qemu-leaderboard__scroll {
+    margin: 1rem 0.75rem;
+  }
+}
