@@ -10,11 +10,4 @@
 
 [☞ 线上报名通道 ☄](https://opencamp.cn/qemu/camp/2025/register?code=cMJyhG4owbdmU)
 
-!!! note "报名统计"
-    截至 2025 年 10 月 12 日晚 8 点开营仪式之前，共有 858 名学员报名，来自 379 所高校、231 家企业和 80 个城市。
-
-    ![报名学员数据统计](../../image/data1.png)
-
-    学员中 63% 为已工作人员，37% 为在校生。高校（排名不分先后）中以西安电子科技大学、北京邮电大学、东南大学、清华大学、复旦大学、华中科技大学等多所高校的学员最多。
-
-    ![报名学员高校数据统计](../../image/data1.png)
+<div class="qemu-registration-stats" data-registration-src="../../data/qemu-registration-2025.json" data-registration-title="QEMU 训练营 2025 报名数据统计">报名数据加载中...</div>

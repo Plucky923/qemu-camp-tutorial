@@ -1,0 +1,3324 @@
+{
+  "year": "2025",
+  "source": "QEMU 训练营 2025-报名统计.xlsx",
+  "totalSignups": 1080,
+  "totalSource": "QEMU 训练营 2025-报名表.xlsx",
+  "dimensions": [
+    {
+      "key": "school",
+      "label": "高校",
+      "unit": "所",
+      "personUnit": "人",
+      "items": [
+        {
+          "name": "西安电子科技大学",
+          "count": 27
+        },
+        {
+          "name": "北京邮电大学",
+          "count": 23
+        },
+        {
+          "name": "东南大学",
+          "count": 16
+        },
+        {
+          "name": "哈尔滨工业大学",
+          "count": 15
+        },
+        {
+          "name": "电子科技大学",
+          "count": 14
+        },
+        {
+          "name": "中国科学院大学",
+          "count": 14
+        },
+        {
+          "name": "清华大学",
+          "count": 11
+        },
+        {
+          "name": "浙江大学",
+          "count": 11
+        },
+        {
+          "name": "杭州电子科技大学",
+          "count": 11
+        },
+        {
+          "name": "华中科技大学",
+          "count": 11
+        },
+        {
+          "name": "西安交通大学",
+          "count": 10
+        },
+        {
+          "name": "复旦大学",
+          "count": 9
+        },
+        {
+          "name": "赣南师范大学科技学院",
+          "count": 9
+        },
+        {
+          "name": "深圳大学",
+          "count": 9
+        },
+        {
+          "name": "山东大学",
+          "count": 9
+        },
+        {
+          "name": "重庆邮电大学",
+          "count": 9
+        },
+        {
+          "name": "郑州大学",
+          "count": 8
+        },
+        {
+          "name": "国防科技大学",
+          "count": 8
+        },
+        {
+          "name": "信息工程大学",
+          "count": 8
+        },
+        {
+          "name": "中国科学技术大学",
+          "count": 8
+        },
+        {
+          "name": "四川大学",
+          "count": 8
+        },
+        {
+          "name": "华南理工大学",
+          "count": 7
+        },
+        {
+          "name": "上海交通大学",
+          "count": 7
+        },
+        {
+          "name": "吉林大学",
+          "count": 7
+        },
+        {
+          "name": "西安邮电大学",
+          "count": 7
+        },
+        {
+          "name": "重庆理工大学",
+          "count": 7
+        },
+        {
+          "name": "北京航空航天大学",
+          "count": 7
+        },
+        {
+          "name": "华东师范大学",
+          "count": 6
+        },
+        {
+          "name": "上海大学",
+          "count": 6
+        },
+        {
+          "name": "哈尔滨工程大学",
+          "count": 6
+        },
+        {
+          "name": "合肥工业大学",
+          "count": 6
+        },
+        {
+          "name": "北京大学",
+          "count": 6
+        },
+        {
+          "name": "北京科技大学",
+          "count": 6
+        },
+        {
+          "name": "上海科技大学",
+          "count": 6
+        },
+        {
+          "name": "广东工业大学",
+          "count": 6
+        },
+        {
+          "name": "重庆大学",
+          "count": 6
+        },
+        {
+          "name": "北京交通大学",
+          "count": 6
+        },
+        {
+          "name": "东北大学",
+          "count": 6
+        },
+        {
+          "name": "上海交大",
+          "count": 5
+        },
+        {
+          "name": "天津大学",
+          "count": 5
+        },
+        {
+          "name": "沈阳工业大学",
+          "count": 5
+        },
+        {
+          "name": "湖南大学",
+          "count": 5
+        },
+        {
+          "name": "南京航空航天大学",
+          "count": 5
+        },
+        {
+          "name": "武汉大学",
+          "count": 5
+        },
+        {
+          "name": "中山大学",
+          "count": 5
+        },
+        {
+          "name": "电子科技大学成都学院",
+          "count": 5
+        },
+        {
+          "name": "南京大学",
+          "count": 5
+        },
+        {
+          "name": "成都信息工程大学",
+          "count": 5
+        },
+        {
+          "name": "湖南人文科技学院",
+          "count": 4
+        },
+        {
+          "name": "武汉理工大学",
+          "count": 4
+        },
+        {
+          "name": "河南理工大学",
+          "count": 4
+        },
+        {
+          "name": "燕山大学",
+          "count": 4
+        },
+        {
+          "name": "安徽大学",
+          "count": 4
+        },
+        {
+          "name": "山东科技大学",
+          "count": 4
+        },
+        {
+          "name": "河北大学",
+          "count": 4
+        },
+        {
+          "name": "长沙理工大学",
+          "count": 4
+        },
+        {
+          "name": "兰州大学",
+          "count": 4
+        },
+        {
+          "name": "太原理工大学",
+          "count": 4
+        },
+        {
+          "name": "南京理工大学",
+          "count": 4
+        },
+        {
+          "name": "西安工业大学",
+          "count": 4
+        },
+        {
+          "name": "中南大学",
+          "count": 4
+        },
+        {
+          "name": "西安科技大学",
+          "count": 3
+        },
+        {
+          "name": "西南科技大学",
+          "count": 3
+        },
+        {
+          "name": "北方工业大学",
+          "count": 3
+        },
+        {
+          "name": "绍兴文理学院",
+          "count": 3
+        },
+        {
+          "name": "桂林电子科技大学",
+          "count": 3
+        },
+        {
+          "name": "大连海事大学",
+          "count": 3
+        },
+        {
+          "name": "北京理工大学",
+          "count": 3
+        },
+        {
+          "name": "西北工业大学",
+          "count": 3
+        },
+        {
+          "name": "北京化工大学",
+          "count": 3
+        },
+        {
+          "name": "北京工业大学",
+          "count": 3
+        },
+        {
+          "name": "上海电力大学",
+          "count": 3
+        },
+        {
+          "name": "南京邮电大学",
+          "count": 3
+        },
+        {
+          "name": "大连理工大学",
+          "count": 3
+        },
+        {
+          "name": "国防科大",
+          "count": 3
+        },
+        {
+          "name": "江西师范大学",
+          "count": 3
+        },
+        {
+          "name": "武汉科技大学",
+          "count": 3
+        },
+        {
+          "name": "福州大学",
+          "count": 3
+        },
+        {
+          "name": "集美大学",
+          "count": 3
+        },
+        {
+          "name": "安徽理工大学",
+          "count": 3
+        },
+        {
+          "name": "西南交通大学",
+          "count": 3
+        },
+        {
+          "name": "天津中德应用技术大学",
+          "count": 3
+        },
+        {
+          "name": "天津科技大学",
+          "count": 3
+        },
+        {
+          "name": "西电",
+          "count": 3
+        },
+        {
+          "name": "湘潭大学",
+          "count": 3
+        },
+        {
+          "name": "1",
+          "count": 3
+        },
+        {
+          "name": "中国矿业大学（北京）",
+          "count": 2
+        },
+        {
+          "name": "北方民族大学",
+          "count": 2
+        },
+        {
+          "name": "北京信息科技大学",
+          "count": 2
+        },
+        {
+          "name": "佳木斯大学",
+          "count": 2
+        },
+        {
+          "name": "太原科技大学",
+          "count": 2
+        },
+        {
+          "name": "大连东软信息学院",
+          "count": 2
+        },
+        {
+          "name": "西安理工大学",
+          "count": 2
+        },
+        {
+          "name": "中科大",
+          "count": 2
+        },
+        {
+          "name": "同济大学",
+          "count": 2
+        },
+        {
+          "name": "福建师范大学",
+          "count": 2
+        },
+        {
+          "name": "江苏大学",
+          "count": 2
+        },
+        {
+          "name": "湖南工业大学",
+          "count": 2
+        },
+        {
+          "name": "商洛学院",
+          "count": 2
+        },
+        {
+          "name": "门头沟学院",
+          "count": 2
+        },
+        {
+          "name": "河北科技大学",
+          "count": 2
+        },
+        {
+          "name": "广州大学",
+          "count": 2
+        },
+        {
+          "name": "西安航空学院",
+          "count": 2
+        },
+        {
+          "name": "南京理工大学紫金学院",
+          "count": 2
+        },
+        {
+          "name": "河海大学",
+          "count": 2
+        },
+        {
+          "name": "内蒙古大学",
+          "count": 2
+        },
+        {
+          "name": "齐鲁工业大学",
+          "count": 2
+        },
+        {
+          "name": "成都理工大学",
+          "count": 2
+        },
+        {
+          "name": "清华",
+          "count": 2
+        },
+        {
+          "name": "宁波大学",
+          "count": 2
+        },
+        {
+          "name": "长春理工大学",
+          "count": 2
+        },
+        {
+          "name": "湖南工学院",
+          "count": 2
+        },
+        {
+          "name": "兰州理工大学",
+          "count": 2
+        },
+        {
+          "name": "武汉华夏理工学院",
+          "count": 2
+        },
+        {
+          "name": "中科院",
+          "count": 2
+        },
+        {
+          "name": "武昌首义学院",
+          "count": 2
+        },
+        {
+          "name": "地质大学",
+          "count": 2
+        },
+        {
+          "name": "none",
+          "count": 2
+        },
+        {
+          "name": "天津理工大学",
+          "count": 2
+        },
+        {
+          "name": "梅渡果大学",
+          "count": 2
+        },
+        {
+          "name": "四川师范大学",
+          "count": 2
+        },
+        {
+          "name": "中国地质大学",
+          "count": 2
+        },
+        {
+          "name": "中北大学",
+          "count": 2
+        },
+        {
+          "name": "中国矿业大学",
+          "count": 2
+        },
+        {
+          "name": "门头沟",
+          "count": 2
+        },
+        {
+          "name": "铜陵学院",
+          "count": 2
+        },
+        {
+          "name": "上海理工大学",
+          "count": 2
+        },
+        {
+          "name": "哈尔滨工业大学（深圳）",
+          "count": 2
+        },
+        {
+          "name": "上海应用技术大学",
+          "count": 2
+        },
+        {
+          "name": "北京工业",
+          "count": 2
+        },
+        {
+          "name": "重庆人文科技学院",
+          "count": 2
+        },
+        {
+          "name": "郑州轻工业大学",
+          "count": 2
+        },
+        {
+          "name": "未填写",
+          "count": 2
+        },
+        {
+          "name": "重大",
+          "count": 2
+        },
+        {
+          "name": "厦门大学",
+          "count": 2
+        },
+        {
+          "name": "江南大学",
+          "count": 2
+        },
+        {
+          "name": "浙江工业大学",
+          "count": 2
+        },
+        {
+          "name": "SDCET",
+          "count": 2
+        },
+        {
+          "name": "中原工学院",
+          "count": 2
+        },
+        {
+          "name": "中国人民大学",
+          "count": 2
+        },
+        {
+          "name": "金陵科技学院",
+          "count": 2
+        },
+        {
+          "name": "航天工程大学",
+          "count": 2
+        },
+        {
+          "name": "工大",
+          "count": 2
+        },
+        {
+          "name": "盐城师范学院",
+          "count": 2
+        },
+        {
+          "name": "西北民族大学",
+          "count": 2
+        },
+        {
+          "name": "西华大学",
+          "count": 2
+        },
+        {
+          "name": "河北工业大学",
+          "count": 2
+        },
+        {
+          "name": "东华大学",
+          "count": 2
+        },
+        {
+          "name": "河南科技大学",
+          "count": 2
+        },
+        {
+          "name": "宁夏理工学院",
+          "count": 2
+        },
+        {
+          "name": "中国石油大学",
+          "count": 1
+        },
+        {
+          "name": "南京工业大学",
+          "count": 1
+        },
+        {
+          "name": "国科大",
+          "count": 1
+        },
+        {
+          "name": "南京农业大学",
+          "count": 1
+        },
+        {
+          "name": "内蒙古科技大学",
+          "count": 1
+        },
+        {
+          "name": "Tianjin University",
+          "count": 1
+        },
+        {
+          "name": "HBNU",
+          "count": 1
+        },
+        {
+          "name": "武汉工程大学",
+          "count": 1
+        },
+        {
+          "name": "广州南方学院",
+          "count": 1
+        },
+        {
+          "name": "武汉交通大学",
+          "count": 1
+        },
+        {
+          "name": "陕西理工大学",
+          "count": 1
+        },
+        {
+          "name": "scnu",
+          "count": 1
+        },
+        {
+          "name": "南昌大学",
+          "count": 1
+        },
+        {
+          "name": "湖南农业大学",
+          "count": 1
+        },
+        {
+          "name": "工业大学广东",
+          "count": 1
+        },
+        {
+          "name": "华北理工大学",
+          "count": 1
+        },
+        {
+          "name": "山东农业大学",
+          "count": 1
+        },
+        {
+          "name": "慕尼黑大学",
+          "count": 1
+        },
+        {
+          "name": "韶关学院",
+          "count": 1
+        },
+        {
+          "name": "天津师范大学",
+          "count": 1
+        },
+        {
+          "name": "上海海事大学",
+          "count": 1
+        },
+        {
+          "name": "西安电子科技",
+          "count": 1
+        },
+        {
+          "name": "中国计量大学",
+          "count": 1
+        },
+        {
+          "name": "厦门理工学院",
+          "count": 1
+        },
+        {
+          "name": "滁州学院",
+          "count": 1
+        },
+        {
+          "name": "西安科技",
+          "count": 1
+        },
+        {
+          "name": "大专",
+          "count": 1
+        },
+        {
+          "name": "安徽建筑大学",
+          "count": 1
+        },
+        {
+          "name": "北京",
+          "count": 1
+        },
+        {
+          "name": "武汉职业大学",
+          "count": 1
+        },
+        {
+          "name": "爱丁堡大学",
+          "count": 1
+        },
+        {
+          "name": "浙江海洋大学",
+          "count": 1
+        },
+        {
+          "name": "复旦",
+          "count": 1
+        },
+        {
+          "name": "沈阳化工",
+          "count": 1
+        },
+        {
+          "name": "南京理工",
+          "count": 1
+        },
+        {
+          "name": "ZZU",
+          "count": 1
+        },
+        {
+          "name": "青岛大学",
+          "count": 1
+        },
+        {
+          "name": "青岛理工大学",
+          "count": 1
+        },
+        {
+          "name": "中国海洋大学",
+          "count": 1
+        },
+        {
+          "name": "秘密呢",
+          "count": 1
+        },
+        {
+          "name": "香港中文大学",
+          "count": 1
+        },
+        {
+          "name": "N/A",
+          "count": 1
+        },
+        {
+          "name": "江西职业技术大学",
+          "count": 1
+        },
+        {
+          "name": "平顶山学院",
+          "count": 1
+        },
+        {
+          "name": "南开大学",
+          "count": 1
+        },
+        {
+          "name": "科学院大学",
+          "count": 1
+        },
+        {
+          "name": "江西理工大学",
+          "count": 1
+        },
+        {
+          "name": "军事科学院",
+          "count": 1
+        },
+        {
+          "name": "首都师范大学",
+          "count": 1
+        },
+        {
+          "name": "原神大学",
+          "count": 1
+        },
+        {
+          "name": "长安大学",
+          "count": 1
+        },
+        {
+          "name": "哈理工",
+          "count": 1
+        },
+        {
+          "name": "闽南师范大学",
+          "count": 1
+        },
+        {
+          "name": "cuit",
+          "count": 1
+        },
+        {
+          "name": "北京林业大学",
+          "count": 1
+        },
+        {
+          "name": "徐州工程学院",
+          "count": 1
+        },
+        {
+          "name": "南航",
+          "count": 1
+        },
+        {
+          "name": "成都东软学院",
+          "count": 1
+        },
+        {
+          "name": "曲阜师范大学",
+          "count": 1
+        },
+        {
+          "name": "苏州科技大学",
+          "count": 1
+        },
+        {
+          "name": "巢湖学院",
+          "count": 1
+        },
+        {
+          "name": "山东理工大学",
+          "count": 1
+        },
+        {
+          "name": "哈师大",
+          "count": 1
+        },
+        {
+          "name": "贺州学院",
+          "count": 1
+        },
+        {
+          "name": "常州工学院",
+          "count": 1
+        },
+        {
+          "name": "长春大学",
+          "count": 1
+        },
+        {
+          "name": "南农",
+          "count": 1
+        },
+        {
+          "name": "wu",
+          "count": 1
+        },
+        {
+          "name": "沈阳理工大学",
+          "count": 1
+        },
+        {
+          "name": "河南财经政法大学",
+          "count": 1
+        },
+        {
+          "name": "加里敦大学",
+          "count": 1
+        },
+        {
+          "name": "太原学院",
+          "count": 1
+        },
+        {
+          "name": "成都地质学院",
+          "count": 1
+        },
+        {
+          "name": "河北经贸大学",
+          "count": 1
+        },
+        {
+          "name": "lcu",
+          "count": 1
+        },
+        {
+          "name": "成都信大",
+          "count": 1
+        },
+        {
+          "name": "大连理工",
+          "count": 1
+        },
+        {
+          "name": "华北水利水电大学",
+          "count": 1
+        },
+        {
+          "name": "山西农业大学",
+          "count": 1
+        },
+        {
+          "name": "暂无",
+          "count": 1
+        },
+        {
+          "name": "天津职业技术师范大学",
+          "count": 1
+        },
+        {
+          "name": "江西农业大学",
+          "count": 1
+        },
+        {
+          "name": "国开",
+          "count": 1
+        },
+        {
+          "name": "新疆理工学院",
+          "count": 1
+        },
+        {
+          "name": "四川文理学院",
+          "count": 1
+        },
+        {
+          "name": "山东",
+          "count": 1
+        },
+        {
+          "name": "西安理工",
+          "count": 1
+        },
+        {
+          "name": "同济大学浙江学院",
+          "count": 1
+        },
+        {
+          "name": "oo",
+          "count": 1
+        },
+        {
+          "name": "太原工业学院",
+          "count": 1
+        },
+        {
+          "name": "聊城大学",
+          "count": 1
+        },
+        {
+          "name": "广东培正学院",
+          "count": 1
+        },
+        {
+          "name": "广西民族师范学院",
+          "count": 1
+        },
+        {
+          "name": "海南比勒费尔德应用科学大学",
+          "count": 1
+        },
+        {
+          "name": "哈尔滨理工大学",
+          "count": 1
+        },
+        {
+          "name": "中国石油大学华东",
+          "count": 1
+        },
+        {
+          "name": "天津仁爱学院",
+          "count": 1
+        },
+        {
+          "name": "温州理工学院",
+          "count": 1
+        },
+        {
+          "name": "合肥大学",
+          "count": 1
+        },
+        {
+          "name": "江科大",
+          "count": 1
+        },
+        {
+          "name": "上海杉达学院",
+          "count": 1
+        },
+        {
+          "name": "青岛职业技术学院",
+          "count": 1
+        },
+        {
+          "name": "上海技术应用大学",
+          "count": 1
+        },
+        {
+          "name": "未名湖大学",
+          "count": 1
+        },
+        {
+          "name": "西安工程大学",
+          "count": 1
+        },
+        {
+          "name": "湖北科技学院",
+          "count": 1
+        },
+        {
+          "name": "安徽农业大学",
+          "count": 1
+        },
+        {
+          "name": "河南科技学院",
+          "count": 1
+        },
+        {
+          "name": "山东交通学院",
+          "count": 1
+        },
+        {
+          "name": "扬州大学",
+          "count": 1
+        },
+        {
+          "name": "杭电",
+          "count": 1
+        },
+        {
+          "name": "三江学院",
+          "count": 1
+        },
+        {
+          "name": "西工大",
+          "count": 1
+        },
+        {
+          "name": "武汉工程科技学院",
+          "count": 1
+        },
+        {
+          "name": "tud",
+          "count": 1
+        },
+        {
+          "name": "深圳技术大学",
+          "count": 1
+        },
+        {
+          "name": "宁夏大学",
+          "count": 1
+        },
+        {
+          "name": "南昌工学院",
+          "count": 1
+        },
+        {
+          "name": "上理工",
+          "count": 1
+        },
+        {
+          "name": "科技大學",
+          "count": 1
+        },
+        {
+          "name": "电子科技大学中山学院",
+          "count": 1
+        },
+        {
+          "name": "黄山学院",
+          "count": 1
+        },
+        {
+          "name": "南阳理工学院",
+          "count": 1
+        },
+        {
+          "name": "广东科技技术职业学院",
+          "count": 1
+        },
+        {
+          "name": "华师",
+          "count": 1
+        },
+        {
+          "name": "中国电子科技集团第十五研究所",
+          "count": 1
+        },
+        {
+          "name": "b站大学",
+          "count": 1
+        },
+        {
+          "name": "华中师范大学",
+          "count": 1
+        },
+        {
+          "name": "南华大学",
+          "count": 1
+        },
+        {
+          "name": "抚顺职业技术学院",
+          "count": 1
+        },
+        {
+          "name": "University of Virginia",
+          "count": 1
+        },
+        {
+          "name": "湖北工业大学",
+          "count": 1
+        },
+        {
+          "name": "邮电大学",
+          "count": 1
+        },
+        {
+          "name": "许昌学院",
+          "count": 1
+        },
+        {
+          "name": "香港中文大学深圳",
+          "count": 1
+        },
+        {
+          "name": "浙江长征职业技术学院",
+          "count": 1
+        },
+        {
+          "name": "兰州信息科技学院",
+          "count": 1
+        },
+        {
+          "name": "香港城市大学",
+          "count": 1
+        },
+        {
+          "name": "华东交通大学理工学院",
+          "count": 1
+        },
+        {
+          "name": "安徽科技大学",
+          "count": 1
+        },
+        {
+          "name": "深圳市职业技术学院",
+          "count": 1
+        },
+        {
+          "name": "暨南大学",
+          "count": 1
+        },
+        {
+          "name": "FFF",
+          "count": 1
+        },
+        {
+          "name": "中国石油大学（华东）",
+          "count": 1
+        },
+        {
+          "name": "河南财政金融学院",
+          "count": 1
+        },
+        {
+          "name": "阳光学院",
+          "count": 1
+        },
+        {
+          "name": "大连民族大学",
+          "count": 1
+        },
+        {
+          "name": "南洋理工大学",
+          "count": 1
+        },
+        {
+          "name": "新加坡国立大学",
+          "count": 1
+        },
+        {
+          "name": "华南师范大学",
+          "count": 1
+        },
+        {
+          "name": "西安石油大学",
+          "count": 1
+        },
+        {
+          "name": "河南工业大学",
+          "count": 1
+        },
+        {
+          "name": "北信科大",
+          "count": 1
+        },
+        {
+          "name": "bilibili大学",
+          "count": 1
+        },
+        {
+          "name": "苏州工学院",
+          "count": 1
+        },
+        {
+          "name": "三峡大学",
+          "count": 1
+        },
+        {
+          "name": "沈阳大学",
+          "count": 1
+        },
+        {
+          "name": "内蒙古师范大学",
+          "count": 1
+        },
+        {
+          "name": "江苏理工学院",
+          "count": 1
+        },
+        {
+          "name": "中大",
+          "count": 1
+        },
+        {
+          "name": "广州铁路职业技术学院",
+          "count": 1
+        },
+        {
+          "name": "0",
+          "count": 1
+        },
+        {
+          "name": "国际关系学院",
+          "count": 1
+        },
+        {
+          "name": "四川工业科技学院",
+          "count": 1
+        },
+        {
+          "name": "西北师范大学",
+          "count": 1
+        },
+        {
+          "name": "江汉大学",
+          "count": 1
+        },
+        {
+          "name": "四川师大",
+          "count": 1
+        },
+        {
+          "name": "昆明理工大学",
+          "count": 1
+        },
+        {
+          "name": "澳门科技大学",
+          "count": 1
+        },
+        {
+          "name": "Georgia Institute of Technology",
+          "count": 1
+        },
+        {
+          "name": "南京城市职业学院",
+          "count": 1
+        },
+        {
+          "name": "同济",
+          "count": 1
+        },
+        {
+          "name": "吉林师范大学",
+          "count": 1
+        },
+        {
+          "name": "大连",
+          "count": 1
+        },
+        {
+          "name": "辽宁石油化工大学",
+          "count": 1
+        },
+        {
+          "name": "中科院大学",
+          "count": 1
+        },
+        {
+          "name": "北京物资学院",
+          "count": 1
+        },
+        {
+          "name": "广州理工学院",
+          "count": 1
+        },
+        {
+          "name": "UUU",
+          "count": 1
+        },
+        {
+          "name": "tongji university",
+          "count": 1
+        },
+        {
+          "name": "广州航海学院",
+          "count": 1
+        },
+        {
+          "name": "swjt",
+          "count": 1
+        },
+        {
+          "name": "xidian university",
+          "count": 1
+        },
+        {
+          "name": "hhxt",
+          "count": 1
+        },
+        {
+          "name": "九州大学",
+          "count": 1
+        },
+        {
+          "name": "hkbu",
+          "count": 1
+        },
+        {
+          "name": "齐鲁师范学院",
+          "count": 1
+        },
+        {
+          "name": "重庆理工",
+          "count": 1
+        },
+        {
+          "name": "whpu",
+          "count": 1
+        },
+        {
+          "name": "华科",
+          "count": 1
+        },
+        {
+          "name": "syu",
+          "count": 1
+        },
+        {
+          "name": "哈尔滨工业大学（威海）",
+          "count": 1
+        },
+        {
+          "name": "广西师范大学",
+          "count": 1
+        },
+        {
+          "name": "湖南工程学院",
+          "count": 1
+        },
+        {
+          "name": "x",
+          "count": 1
+        },
+        {
+          "name": "电子科大",
+          "count": 1
+        },
+        {
+          "name": "西北大学",
+          "count": 1
+        },
+        {
+          "name": "兰州石化职业技术大学",
+          "count": 1
+        },
+        {
+          "name": "广东东软",
+          "count": 1
+        },
+        {
+          "name": "南京信息职业技术学院",
+          "count": 1
+        },
+        {
+          "name": "CSU",
+          "count": 1
+        },
+        {
+          "name": "华北科技学院",
+          "count": 1
+        },
+        {
+          "name": "86202",
+          "count": 1
+        },
+        {
+          "name": "陕西科技大学",
+          "count": 1
+        },
+        {
+          "name": "安徽财经大学",
+          "count": 1
+        },
+        {
+          "name": "江苏科技大学",
+          "count": 1
+        },
+        {
+          "name": "南方医科大学",
+          "count": 1
+        },
+        {
+          "name": "苏州大学",
+          "count": 1
+        },
+        {
+          "name": "ningbo",
+          "count": 1
+        },
+        {
+          "name": "赣南师范",
+          "count": 1
+        },
+        {
+          "name": "商丘工学院",
+          "count": 1
+        },
+        {
+          "name": "xxx",
+          "count": 1
+        },
+        {
+          "name": "中国农业大学",
+          "count": 1
+        },
+        {
+          "name": "南京信息工程大学",
+          "count": 1
+        },
+        {
+          "name": "上交",
+          "count": 1
+        },
+        {
+          "name": "海洋大学",
+          "count": 1
+        },
+        {
+          "name": "中国民航大学",
+          "count": 1
+        },
+        {
+          "name": "南安普顿大学",
+          "count": 1
+        },
+        {
+          "name": "npu",
+          "count": 1
+        },
+        {
+          "name": "陕西服装工程学院",
+          "count": 1
+        },
+        {
+          "name": "河南开封科技传媒学院",
+          "count": 1
+        },
+        {
+          "name": "中科院软件所",
+          "count": 1
+        },
+        {
+          "name": "南京师范大学",
+          "count": 1
+        },
+        {
+          "name": "教育部直属高校",
+          "count": 1
+        },
+        {
+          "name": "河北建筑工程学院",
+          "count": 1
+        },
+        {
+          "name": "中国科技大学",
+          "count": 1
+        },
+        {
+          "name": "职业技术学院",
+          "count": 1
+        },
+        {
+          "name": "九江学院",
+          "count": 1
+        },
+        {
+          "name": "香港中文大学（深圳）",
+          "count": 1
+        },
+        {
+          "name": "西安工商学院",
+          "count": 1
+        },
+        {
+          "name": "Curtin University",
+          "count": 1
+        },
+        {
+          "name": "q大",
+          "count": 1
+        },
+        {
+          "name": "河南大学",
+          "count": 1
+        },
+        {
+          "name": "重庆三峡学院",
+          "count": 1
+        },
+        {
+          "name": "黑龙江科技大学",
+          "count": 1
+        },
+        {
+          "name": "南京林业大学",
+          "count": 1
+        },
+        {
+          "name": "华东交通大学",
+          "count": 1
+        },
+        {
+          "name": "是",
+          "count": 1
+        },
+        {
+          "name": "Nanchang University",
+          "count": 1
+        },
+        {
+          "name": "西安建筑科技大学",
+          "count": 1
+        },
+        {
+          "name": "天津天狮学院",
+          "count": 1
+        },
+        {
+          "name": "天津工业大学",
+          "count": 1
+        },
+        {
+          "name": "西财天府",
+          "count": 1
+        },
+        {
+          "name": "厚生省检察官",
+          "count": 1
+        },
+        {
+          "name": "湖南信息学院",
+          "count": 1
+        },
+        {
+          "name": "北工大",
+          "count": 1
+        },
+        {
+          "name": "榆林学院",
+          "count": 1
+        },
+        {
+          "name": "长沙理工",
+          "count": 1
+        },
+        {
+          "name": "北京理工大学珠海学院",
+          "count": 1
+        },
+        {
+          "name": "安阳师范学院",
+          "count": 1
+        },
+        {
+          "name": "郑大",
+          "count": 1
+        },
+        {
+          "name": "家里蹲大学",
+          "count": 1
+        },
+        {
+          "name": "五邑大学",
+          "count": 1
+        },
+        {
+          "name": "移通学院",
+          "count": 1
+        },
+        {
+          "name": "帕多瓦大学",
+          "count": 1
+        },
+        {
+          "name": "ChengDu College of University of Electronic Science and Technology of China",
+          "count": 1
+        },
+        {
+          "name": "湖南",
+          "count": 1
+        },
+        {
+          "name": "银川能源学院",
+          "count": 1
+        },
+        {
+          "name": "武汉纺织大学",
+          "count": 1
+        },
+        {
+          "name": "＊",
+          "count": 1
+        },
+        {
+          "name": "北",
+          "count": 1
+        },
+        {
+          "name": "悉尼大学",
+          "count": 1
+        },
+        {
+          "name": "浙江理工",
+          "count": 1
+        },
+        {
+          "name": "新疆财经学院",
+          "count": 1
+        },
+        {
+          "name": "湖北大学",
+          "count": 1
+        },
+        {
+          "name": "Null",
+          "count": 1
+        },
+        {
+          "name": "武理",
+          "count": 1
+        },
+        {
+          "name": "华南农业大学",
+          "count": 1
+        },
+        {
+          "name": "广东技术师范大学",
+          "count": 1
+        },
+        {
+          "name": "东莞理工学院",
+          "count": 1
+        },
+        {
+          "name": "河北工程大学",
+          "count": 1
+        },
+        {
+          "name": "贵州大学",
+          "count": 1
+        },
+        {
+          "name": "枣庄学院",
+          "count": 1
+        },
+        {
+          "name": "河南师范大学",
+          "count": 1
+        },
+        {
+          "name": "xbmu",
+          "count": 1
+        },
+        {
+          "name": "山科",
+          "count": 1
+        },
+        {
+          "name": "天大",
+          "count": 1
+        },
+        {
+          "name": "略",
+          "count": 1
+        },
+        {
+          "name": "湖南第一师范学院",
+          "count": 1
+        },
+        {
+          "name": "南京工程学院",
+          "count": 1
+        },
+        {
+          "name": "北大",
+          "count": 1
+        },
+        {
+          "name": "北华大学",
+          "count": 1
+        },
+        {
+          "name": "安徽工程大学",
+          "count": 1
+        },
+        {
+          "name": "佛山大学",
+          "count": 1
+        },
+        {
+          "name": "上海第二工业大学",
+          "count": 1
+        },
+        {
+          "name": "惠州学院",
+          "count": 1
+        },
+        {
+          "name": "辽宁工程技术大学",
+          "count": 1
+        },
+        {
+          "name": "中南林业科技大学",
+          "count": 1
+        },
+        {
+          "name": "Sanda University",
+          "count": 1
+        },
+        {
+          "name": "西安财经大学",
+          "count": 1
+        },
+        {
+          "name": "中央民族大学",
+          "count": 1
+        },
+        {
+          "name": "圣彼得堡彼得大帝理工大学",
+          "count": 1
+        },
+        {
+          "name": "njit",
+          "count": 1
+        },
+        {
+          "name": "北京师范大学",
+          "count": 1
+        },
+        {
+          "name": "cqupt",
+          "count": 1
+        },
+        {
+          "name": "昆明理工",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "key": "city",
+      "label": "城市",
+      "unit": "个",
+      "personUnit": "人",
+      "items": [
+        {
+          "name": "北京市/市辖区",
+          "count": 219
+        },
+        {
+          "name": "上海市/市辖区",
+          "count": 119
+        },
+        {
+          "name": "陕西省/西安市",
+          "count": 68
+        },
+        {
+          "name": "广东省/深圳市",
+          "count": 66
+        },
+        {
+          "name": "四川省/成都市",
+          "count": 55
+        },
+        {
+          "name": "浙江省/杭州市",
+          "count": 51
+        },
+        {
+          "name": "广东省/广州市",
+          "count": 42
+        },
+        {
+          "name": "湖北省/武汉市",
+          "count": 40
+        },
+        {
+          "name": "江苏省/南京市",
+          "count": 35
+        },
+        {
+          "name": "湖南省/长沙市",
+          "count": 28
+        },
+        {
+          "name": "重庆市/市辖区",
+          "count": 23
+        },
+        {
+          "name": "安徽省/合肥市",
+          "count": 21
+        },
+        {
+          "name": "江苏省/苏州市",
+          "count": 19
+        },
+        {
+          "name": "天津市/市辖区",
+          "count": 18
+        },
+        {
+          "name": "河南省/郑州市",
+          "count": 13
+        },
+        {
+          "name": "山东省/济南市",
+          "count": 13
+        },
+        {
+          "name": "海外",
+          "count": 13
+        },
+        {
+          "name": "黑龙江省/哈尔滨市",
+          "count": 10
+        },
+        {
+          "name": "江苏省/无锡市",
+          "count": 7
+        },
+        {
+          "name": "江西省/赣州市",
+          "count": 7
+        },
+        {
+          "name": "广东省/东莞市",
+          "count": 6
+        },
+        {
+          "name": "浙江省/绍兴市",
+          "count": 6
+        },
+        {
+          "name": "甘肃省/兰州市",
+          "count": 6
+        },
+        {
+          "name": "辽宁省/大连市",
+          "count": 5
+        },
+        {
+          "name": "山东省/青岛市",
+          "count": 5
+        },
+        {
+          "name": "四川省/德阳市",
+          "count": 5
+        },
+        {
+          "name": "广东省/珠海市",
+          "count": 4
+        },
+        {
+          "name": "河南省/焦作市",
+          "count": 4
+        },
+        {
+          "name": "山西省/太原市",
+          "count": 4
+        },
+        {
+          "name": "浙江省/宁波市",
+          "count": 4
+        },
+        {
+          "name": "福建省/厦门市",
+          "count": 4
+        },
+        {
+          "name": "吉林省/长春市",
+          "count": 3
+        },
+        {
+          "name": "江西省/上饶市",
+          "count": 3
+        },
+        {
+          "name": "江苏省/常州市",
+          "count": 3
+        },
+        {
+          "name": "福建省/福州市",
+          "count": 3
+        },
+        {
+          "name": "河北省/唐山市",
+          "count": 3
+        },
+        {
+          "name": "辽宁省/沈阳市",
+          "count": 3
+        },
+        {
+          "name": "山东省/日照市",
+          "count": 2
+        },
+        {
+          "name": "陕西省/咸阳市",
+          "count": 2
+        },
+        {
+          "name": "河南省/洛阳市",
+          "count": 2
+        },
+        {
+          "name": "内蒙古自治区/呼和浩特市",
+          "count": 2
+        },
+        {
+          "name": "江苏省/徐州市",
+          "count": 2
+        },
+        {
+          "name": "广东省/惠州市",
+          "count": 2
+        },
+        {
+          "name": "宁夏回族自治区/银川市",
+          "count": 2
+        },
+        {
+          "name": "广东省/佛山市",
+          "count": 2
+        },
+        {
+          "name": "福建省/漳州市",
+          "count": 2
+        },
+        {
+          "name": "江苏省/盐城市",
+          "count": 2
+        },
+        {
+          "name": "河北省/秦皇岛市",
+          "count": 2
+        },
+        {
+          "name": "江苏省/镇江市",
+          "count": 2
+        },
+        {
+          "name": "江西省/南昌市",
+          "count": 2
+        },
+        {
+          "name": "云南省/昆明市",
+          "count": 2
+        },
+        {
+          "name": "广西壮族自治区/桂林市",
+          "count": 2
+        },
+        {
+          "name": "湖南省/湘潭市",
+          "count": 1
+        },
+        {
+          "name": "安徽省/淮南市",
+          "count": 1
+        },
+        {
+          "name": "湖北省/十堰市",
+          "count": 1
+        },
+        {
+          "name": "湖南省/株洲市",
+          "count": 1
+        },
+        {
+          "name": "河南省/省直辖县级行政区划",
+          "count": 1
+        },
+        {
+          "name": "河北省/廊坊市",
+          "count": 1
+        },
+        {
+          "name": "湖南省/常德市",
+          "count": 1
+        },
+        {
+          "name": "江西省/抚州市",
+          "count": 1
+        },
+        {
+          "name": "四川省/绵阳市",
+          "count": 1
+        },
+        {
+          "name": "山西省/晋中市",
+          "count": 1
+        },
+        {
+          "name": "陕西省/榆林市",
+          "count": 1
+        },
+        {
+          "name": "山西省/长治市",
+          "count": 1
+        },
+        {
+          "name": "湖南省/衡阳市",
+          "count": 1
+        },
+        {
+          "name": "湖北省/襄阳市",
+          "count": 1
+        },
+        {
+          "name": "湖南省/益阳市",
+          "count": 1
+        },
+        {
+          "name": "广东省/江门市",
+          "count": 1
+        },
+        {
+          "name": "台湾省/新北市",
+          "count": 1
+        },
+        {
+          "name": "河南省/平顶山市",
+          "count": 1
+        },
+        {
+          "name": "河南省/驻马店市",
+          "count": 1
+        },
+        {
+          "name": "广东省/韶关市",
+          "count": 1
+        },
+        {
+          "name": "广西壮族自治区/南宁市",
+          "count": 1
+        },
+        {
+          "name": "山西省/忻州市",
+          "count": 1
+        },
+        {
+          "name": "广东省/中山市",
+          "count": 1
+        },
+        {
+          "name": "河北省/张家口市",
+          "count": 1
+        },
+        {
+          "name": "广西壮族自治区/梧州市",
+          "count": 1
+        },
+        {
+          "name": "河南省/南阳市",
+          "count": 1
+        },
+        {
+          "name": "新疆维吾尔自治区/乌鲁木齐市",
+          "count": 1
+        },
+        {
+          "name": "内蒙古自治区/赤峰市",
+          "count": 1
+        },
+        {
+          "name": "河南省/许昌市",
+          "count": 1
+        },
+        {
+          "name": "海南省/儋州市",
+          "count": 1
+        },
+        {
+          "name": "浙江省/金华市",
+          "count": 1
+        },
+        {
+          "name": "江西省/吉安市",
+          "count": 1
+        },
+        {
+          "name": "香港特别行政区/新界",
+          "count": 1
+        },
+        {
+          "name": "新疆维吾尔自治区/阿克苏地区",
+          "count": 1
+        },
+        {
+          "name": "重庆市/县",
+          "count": 1
+        },
+        {
+          "name": "河北省/邯郸市",
+          "count": 1
+        },
+        {
+          "name": "浙江省/嘉兴市",
+          "count": 1
+        },
+        {
+          "name": "河南省/信阳市",
+          "count": 1
+        },
+        {
+          "name": "安徽省/芜湖市",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "key": "company",
+      "label": "企业",
+      "unit": "家",
+      "personUnit": "人",
+      "items": [
+        {
+          "name": "阿里巴巴",
+          "count": 5
+        },
+        {
+          "name": "保密",
+          "count": 4
+        },
+        {
+          "name": "武汉凌久微电子有限公司",
+          "count": 4
+        },
+        {
+          "name": "amd",
+          "count": 3
+        },
+        {
+          "name": "wu",
+          "count": 3
+        },
+        {
+          "name": "华为",
+          "count": 3
+        },
+        {
+          "name": "计算所",
+          "count": 2
+        },
+        {
+          "name": "中科创达",
+          "count": 2
+        },
+        {
+          "name": "华为技术有限公司",
+          "count": 2
+        },
+        {
+          "name": "中国科学院软件研究所",
+          "count": 2
+        },
+        {
+          "name": "字节跳动",
+          "count": 2
+        },
+        {
+          "name": "PLCT实验室",
+          "count": 2
+        },
+        {
+          "name": "谦川科技",
+          "count": 2
+        },
+        {
+          "name": "上海苦芽科技有限公司",
+          "count": 2
+        },
+        {
+          "name": "小米",
+          "count": 2
+        },
+        {
+          "name": "none",
+          "count": 2
+        },
+        {
+          "name": "联芸科技",
+          "count": 2
+        },
+        {
+          "name": "麒麟软件",
+          "count": 2
+        },
+        {
+          "name": "深信服",
+          "count": 2
+        },
+        {
+          "name": "腾讯",
+          "count": 2
+        },
+        {
+          "name": "NA",
+          "count": 2
+        },
+        {
+          "name": "阿里云",
+          "count": 2
+        },
+        {
+          "name": "NIO",
+          "count": 2
+        },
+        {
+          "name": "沈阳辽熵科技有限责任公司",
+          "count": 1
+        },
+        {
+          "name": "成都乐创自动化",
+          "count": 1
+        },
+        {
+          "name": "海兴电力",
+          "count": 1
+        },
+        {
+          "name": "HSBC",
+          "count": 1
+        },
+        {
+          "name": "中国电信股份有限公司韶关分公司",
+          "count": 1
+        },
+        {
+          "name": "omnivision",
+          "count": 1
+        },
+        {
+          "name": "成都奕斯伟计算科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "上海金融期货技术有限公司",
+          "count": 1
+        },
+        {
+          "name": "七牛云",
+          "count": 1
+        },
+        {
+          "name": "ivis",
+          "count": 1
+        },
+        {
+          "name": "佛氏电脑软件（上海）有限公司",
+          "count": 1
+        },
+        {
+          "name": "汇思博",
+          "count": 1
+        },
+        {
+          "name": "浙江大学滨江研究院",
+          "count": 1
+        },
+        {
+          "name": "北京无问芯穹科技有限公司。",
+          "count": 1
+        },
+        {
+          "name": "qax",
+          "count": 1
+        },
+        {
+          "name": "广东跃昉科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "ZTE",
+          "count": 1
+        },
+        {
+          "name": "声网",
+          "count": 1
+        },
+        {
+          "name": "西安微合",
+          "count": 1
+        },
+        {
+          "name": "统信软件",
+          "count": 1
+        },
+        {
+          "name": "中关村实验室",
+          "count": 1
+        },
+        {
+          "name": "龙芯中科",
+          "count": 1
+        },
+        {
+          "name": "上海阿卡思微电子有限公司",
+          "count": 1
+        },
+        {
+          "name": "北京华卓精科科技股份有限公司",
+          "count": 1
+        },
+        {
+          "name": "湖北文理学院",
+          "count": 1
+        },
+        {
+          "name": "通立电子",
+          "count": 1
+        },
+        {
+          "name": "沐曦集成电路",
+          "count": 1
+        },
+        {
+          "name": "中科昊芯",
+          "count": 1
+        },
+        {
+          "name": "务实科技",
+          "count": 1
+        },
+        {
+          "name": "中科曙光信息股份有限公司",
+          "count": 1
+        },
+        {
+          "name": "影微",
+          "count": 1
+        },
+        {
+          "name": "快手",
+          "count": 1
+        },
+        {
+          "name": "瑞银电子",
+          "count": 1
+        },
+        {
+          "name": "北京赶考人工智能教育",
+          "count": 1
+        },
+        {
+          "name": "709",
+          "count": 1
+        },
+        {
+          "name": "-",
+          "count": 1
+        },
+        {
+          "name": "深圳市中兴微电子技术有限公司",
+          "count": 1
+        },
+        {
+          "name": "元石智算",
+          "count": 1
+        },
+        {
+          "name": "北京国芯可信技术有限公司",
+          "count": 1
+        },
+        {
+          "name": "智芯",
+          "count": 1
+        },
+        {
+          "name": "法雷奥",
+          "count": 1
+        },
+        {
+          "name": "北京博得交通设备",
+          "count": 1
+        },
+        {
+          "name": "引望",
+          "count": 1
+        },
+        {
+          "name": "中国人寿",
+          "count": 1
+        },
+        {
+          "name": "spreadt",
+          "count": 1
+        },
+        {
+          "name": "尧云科技",
+          "count": 1
+        },
+        {
+          "name": "轩宇信息",
+          "count": 1
+        },
+        {
+          "name": "Null",
+          "count": 1
+        },
+        {
+          "name": "大连理工大学",
+          "count": 1
+        },
+        {
+          "name": "Sieng",
+          "count": 1
+        },
+        {
+          "name": "极氪汽车",
+          "count": 1
+        },
+        {
+          "name": "上海市贸易学校",
+          "count": 1
+        },
+        {
+          "name": "oppo",
+          "count": 1
+        },
+        {
+          "name": "＊",
+          "count": 1
+        },
+        {
+          "name": "曙光工作室",
+          "count": 1
+        },
+        {
+          "name": "银河航天",
+          "count": 1
+        },
+        {
+          "name": "齐鲁研究院",
+          "count": 1
+        },
+        {
+          "name": "绍兴智宽科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "牟服务器公司",
+          "count": 1
+        },
+        {
+          "name": "凯捷科技",
+          "count": 1
+        },
+        {
+          "name": "经纬恒润",
+          "count": 1
+        },
+        {
+          "name": "之江实验室",
+          "count": 1
+        },
+        {
+          "name": "南昌工学院",
+          "count": 1
+        },
+        {
+          "name": "重庆软通动力信息技术",
+          "count": 1
+        },
+        {
+          "name": "秘密哦",
+          "count": 1
+        },
+        {
+          "name": "detecon",
+          "count": 1
+        },
+        {
+          "name": "保密单位",
+          "count": 1
+        },
+        {
+          "name": "语",
+          "count": 1
+        },
+        {
+          "name": "xxx",
+          "count": 1
+        },
+        {
+          "name": "全知启航",
+          "count": 1
+        },
+        {
+          "name": "家里蹲",
+          "count": 1
+        },
+        {
+          "name": "北京石头科技",
+          "count": 1
+        },
+        {
+          "name": "電子",
+          "count": 1
+        },
+        {
+          "name": "爱思唯尔信息技术有限公司",
+          "count": 1
+        },
+        {
+          "name": "零九微",
+          "count": 1
+        },
+        {
+          "name": "EMC",
+          "count": 1
+        },
+        {
+          "name": "北京小米移动软件有限公司南京分公司",
+          "count": 1
+        },
+        {
+          "name": "中国科学院人家研究所",
+          "count": 1
+        },
+        {
+          "name": "成都菁蓉联创科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "南京安麦森",
+          "count": 1
+        },
+        {
+          "name": "国信科工",
+          "count": 1
+        },
+        {
+          "name": "微芯",
+          "count": 1
+        },
+        {
+          "name": "嵌入式",
+          "count": 1
+        },
+        {
+          "name": "一个小公司",
+          "count": 1
+        },
+        {
+          "name": "吉利学院",
+          "count": 1
+        },
+        {
+          "name": "浙江迪捷软件科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "广西师范大学",
+          "count": 1
+        },
+        {
+          "name": "。",
+          "count": 1
+        },
+        {
+          "name": "Awesomecloud Limited",
+          "count": 1
+        },
+        {
+          "name": "evas",
+          "count": 1
+        },
+        {
+          "name": "刘昕音乐工作室",
+          "count": 1
+        },
+        {
+          "name": "海能达",
+          "count": 1
+        },
+        {
+          "name": "INDYON GmbH",
+          "count": 1
+        },
+        {
+          "name": "紫光展锐",
+          "count": 1
+        },
+        {
+          "name": "五舟",
+          "count": 1
+        },
+        {
+          "name": "北京歌尔泰克科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "上海兆芯集成电路股份公司",
+          "count": 1
+        },
+        {
+          "name": "联通数字科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "紫光展锐股份有限公司",
+          "count": 1
+        },
+        {
+          "name": "天津国芯科技",
+          "count": 1
+        },
+        {
+          "name": "联发科",
+          "count": 1
+        },
+        {
+          "name": "corogine",
+          "count": 1
+        },
+        {
+          "name": "地平线",
+          "count": 1
+        },
+        {
+          "name": "北京智遨通有限公司",
+          "count": 1
+        },
+        {
+          "name": "ASD",
+          "count": 1
+        },
+        {
+          "name": "理想",
+          "count": 1
+        },
+        {
+          "name": "北京数新",
+          "count": 1
+        },
+        {
+          "name": "普华基础软件",
+          "count": 1
+        },
+        {
+          "name": "中科院软件所",
+          "count": 1
+        },
+        {
+          "name": "a",
+          "count": 1
+        },
+        {
+          "name": "安迈信息科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "中国第一汽车股份有限公司",
+          "count": 1
+        },
+        {
+          "name": "中兴微电子",
+          "count": 1
+        },
+        {
+          "name": "汇川",
+          "count": 1
+        },
+        {
+          "name": "韶音",
+          "count": 1
+        },
+        {
+          "name": "深圳信息职业技术大学",
+          "count": 1
+        },
+        {
+          "name": "山丘科技",
+          "count": 1
+        },
+        {
+          "name": "中科曙光",
+          "count": 1
+        },
+        {
+          "name": "北京原力奇点有限公司",
+          "count": 1
+        },
+        {
+          "name": "中铁上海局",
+          "count": 1
+        },
+        {
+          "name": "悦昉科技",
+          "count": 1
+        },
+        {
+          "name": "哈曼（中国）投资有限公司",
+          "count": 1
+        },
+        {
+          "name": "中科院计算所",
+          "count": 1
+        },
+        {
+          "name": "西安易朴技术股份有限公司",
+          "count": 1
+        },
+        {
+          "name": "龙芯",
+          "count": 1
+        },
+        {
+          "name": "#",
+          "count": 1
+        },
+        {
+          "name": "海思",
+          "count": 1
+        },
+        {
+          "name": "北京共绩科技",
+          "count": 1
+        },
+        {
+          "name": "字节",
+          "count": 1
+        },
+        {
+          "name": "长春职业技术学院",
+          "count": 1
+        },
+        {
+          "name": "hitrendtech",
+          "count": 1
+        },
+        {
+          "name": "BMTI",
+          "count": 1
+        },
+        {
+          "name": "uc",
+          "count": 1
+        },
+        {
+          "name": "成都子源电子科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "早稻田大学",
+          "count": 1
+        },
+        {
+          "name": "绍兴淼汇能源科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "相对湿度",
+          "count": 1
+        },
+        {
+          "name": "苏州亿铸智能科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "新点",
+          "count": 1
+        },
+        {
+          "name": "金蝶",
+          "count": 1
+        },
+        {
+          "name": "荣耀终端股份有限公司",
+          "count": 1
+        },
+        {
+          "name": "无上光荣",
+          "count": 1
+        },
+        {
+          "name": "欧冶半导体",
+          "count": 1
+        },
+        {
+          "name": "暂无",
+          "count": 1
+        },
+        {
+          "name": "凌久微",
+          "count": 1
+        },
+        {
+          "name": "领焰科技",
+          "count": 1
+        },
+        {
+          "name": "bmw",
+          "count": 1
+        },
+        {
+          "name": "北京国信中心",
+          "count": 1
+        },
+        {
+          "name": "荣耀终端",
+          "count": 1
+        },
+        {
+          "name": "台州设备租赁有限公司",
+          "count": 1
+        },
+        {
+          "name": "软件所",
+          "count": 1
+        },
+        {
+          "name": "国机互联",
+          "count": 1
+        },
+        {
+          "name": "国防科技大学",
+          "count": 1
+        },
+        {
+          "name": "嘉楠捷思",
+          "count": 1
+        },
+        {
+          "name": "芯来科技",
+          "count": 1
+        },
+        {
+          "name": "灿芯半导体",
+          "count": 1
+        },
+        {
+          "name": "senscomm",
+          "count": 1
+        },
+        {
+          "name": "中航电子",
+          "count": 1
+        },
+        {
+          "name": "一人公司",
+          "count": 1
+        },
+        {
+          "name": "TP-LINK",
+          "count": 1
+        },
+        {
+          "name": "深圳市佳伟恒信",
+          "count": 1
+        },
+        {
+          "name": "政府单位",
+          "count": 1
+        },
+        {
+          "name": "NERV",
+          "count": 1
+        },
+        {
+          "name": "武汉科技大学",
+          "count": 1
+        },
+        {
+          "name": "深圳市电子商务安全证书管理有限公司",
+          "count": 1
+        },
+        {
+          "name": "白云电气",
+          "count": 1
+        },
+        {
+          "name": "XteamSoft",
+          "count": 1
+        },
+        {
+          "name": "移远",
+          "count": 1
+        },
+        {
+          "name": "hm",
+          "count": 1
+        },
+        {
+          "name": "正芯智能",
+          "count": 1
+        },
+        {
+          "name": "招行",
+          "count": 1
+        },
+        {
+          "name": "北京毛豆",
+          "count": 1
+        },
+        {
+          "name": "浙江国自机器人股份有限公司",
+          "count": 1
+        },
+        {
+          "name": "中朗",
+          "count": 1
+        },
+        {
+          "name": "杭州今日头条技术有限公司",
+          "count": 1
+        },
+        {
+          "name": "移远通信",
+          "count": 1
+        },
+        {
+          "name": "不便告知",
+          "count": 1
+        },
+        {
+          "name": "开鸿",
+          "count": 1
+        },
+        {
+          "name": "广州铁刃智造",
+          "count": 1
+        },
+        {
+          "name": "三未信安科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "太初（无锡）电子科技有限公公司",
+          "count": 1
+        },
+        {
+          "name": "长安科技",
+          "count": 1
+        },
+        {
+          "name": "中科创达软件股份有限公司",
+          "count": 1
+        },
+        {
+          "name": "上海",
+          "count": 1
+        },
+        {
+          "name": "小米汽车",
+          "count": 1
+        },
+        {
+          "name": "北京川速微波",
+          "count": 1
+        },
+        {
+          "name": "深圳市先创数字技术有限公司",
+          "count": 1
+        },
+        {
+          "name": "毛豆",
+          "count": 1
+        },
+        {
+          "name": "国家智能网联汽车创新中心",
+          "count": 1
+        },
+        {
+          "name": "旷智中科技术",
+          "count": 1
+        },
+        {
+          "name": "高通",
+          "count": 1
+        },
+        {
+          "name": "融360",
+          "count": 1
+        },
+        {
+          "name": "湖南城市学院",
+          "count": 1
+        },
+        {
+          "name": "阿尔法测绘",
+          "count": 1
+        },
+        {
+          "name": "奥林巴斯",
+          "count": 1
+        },
+        {
+          "name": "楚天龙",
+          "count": 1
+        },
+        {
+          "name": "重庆网络",
+          "count": 1
+        },
+        {
+          "name": "浙江慧仓",
+          "count": 1
+        },
+        {
+          "name": "中航光电科技股份有限公司",
+          "count": 1
+        },
+        {
+          "name": "安迈信息",
+          "count": 1
+        },
+        {
+          "name": "yyss",
+          "count": 1
+        },
+        {
+          "name": "科来",
+          "count": 1
+        },
+        {
+          "name": "此芯科技",
+          "count": 1
+        },
+        {
+          "name": "惠州市讯扬科技公司",
+          "count": 1
+        },
+        {
+          "name": "中朗智控",
+          "count": 1
+        },
+        {
+          "name": "Haotek",
+          "count": 1
+        },
+        {
+          "name": "英特尔",
+          "count": 1
+        },
+        {
+          "name": "湖南工学院",
+          "count": 1
+        },
+        {
+          "name": "吉利汽车研究院",
+          "count": 1
+        },
+        {
+          "name": "geneatlas",
+          "count": 1
+        },
+        {
+          "name": "康吉森",
+          "count": 1
+        },
+        {
+          "name": "中国移动",
+          "count": 1
+        },
+        {
+          "name": "毕业",
+          "count": 1
+        },
+        {
+          "name": "中兴通讯",
+          "count": 1
+        },
+        {
+          "name": "伊迪安",
+          "count": 1
+        },
+        {
+          "name": "合肥君正科级有限公司",
+          "count": 1
+        },
+        {
+          "name": "uCRobotics",
+          "count": 1
+        },
+        {
+          "name": "天津先进技术研究院",
+          "count": 1
+        },
+        {
+          "name": "light.io",
+          "count": 1
+        },
+        {
+          "name": "博一电子科技",
+          "count": 1
+        },
+        {
+          "name": "IIII",
+          "count": 1
+        },
+        {
+          "name": "kz",
+          "count": 1
+        },
+        {
+          "name": "华孚时尚",
+          "count": 1
+        },
+        {
+          "name": "Intel",
+          "count": 1
+        },
+        {
+          "name": "红帽",
+          "count": 1
+        },
+        {
+          "name": "杭州慧博云通科技股份有限公司",
+          "count": 1
+        },
+        {
+          "name": "谦合益邦",
+          "count": 1
+        },
+        {
+          "name": "Carizon",
+          "count": 1
+        },
+        {
+          "name": "统信",
+          "count": 1
+        },
+        {
+          "name": "劳务派遣",
+          "count": 1
+        },
+        {
+          "name": "HT",
+          "count": 1
+        },
+        {
+          "name": "深圳唯创知音电子有限公司",
+          "count": 1
+        },
+        {
+          "name": "为辰信安",
+          "count": 1
+        },
+        {
+          "name": "蚂蚁集团",
+          "count": 1
+        },
+        {
+          "name": "北京毛豆教育咨询有限公司",
+          "count": 1
+        },
+        {
+          "name": "作业帮",
+          "count": 1
+        },
+        {
+          "name": "钜泉光电",
+          "count": 1
+        },
+        {
+          "name": "山东大学",
+          "count": 1
+        },
+        {
+          "name": "中软国际",
+          "count": 1
+        },
+        {
+          "name": "autochips",
+          "count": 1
+        },
+        {
+          "name": "迪文科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "中移苏研",
+          "count": 1
+        },
+        {
+          "name": "上海袂得软件有限公司",
+          "count": 1
+        },
+        {
+          "name": "unitree",
+          "count": 1
+        },
+        {
+          "name": "迪捷",
+          "count": 1
+        },
+        {
+          "name": "杭州宇树科技股份有限公搜",
+          "count": 1
+        },
+        {
+          "name": "中科软",
+          "count": 1
+        },
+        {
+          "name": "上海中广核数字科技有限公司",
+          "count": 1
+        },
+        {
+          "name": "吴无",
+          "count": 1
+        },
+        {
+          "name": "云",
+          "count": 1
+        },
+        {
+          "name": "corigine",
+          "count": 1
+        },
+        {
+          "name": "无",
+          "count": 1
+        },
+        {
+          "name": "航天",
+          "count": 1
+        },
+        {
+          "name": "联想集团",
+          "count": 1
+        },
+        {
+          "name": "kern",
+          "count": 1
+        },
+        {
+          "name": "腾讯云计算(西安)有限公司",
+          "count": 1
+        },
+        {
+          "name": "纳思达集团",
+          "count": 1
+        },
+        {
+          "name": "上海浩霖汇",
+          "count": 1
+        },
+        {
+          "name": "腾讯科技(北京)有限公司",
+          "count": 1
+        },
+        {
+          "name": "软通",
+          "count": 1
+        },
+        {
+          "name": "南大通用",
+          "count": 1
+        },
+        {
+          "name": "支付宝",
+          "count": 1
+        },
+        {
+          "name": "常州米联客信息科技有限公司",
+          "count": 1
+        }
+      ]
+    }
+  ]
+}
