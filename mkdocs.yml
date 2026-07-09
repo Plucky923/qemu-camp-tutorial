@@ -82,6 +82,8 @@ theme:
     - header.autohide
 extra_css:
   - plugins/stylesheets/extra.css
+  - plugins/stylesheets/registration-stats.css
+  - plugins/stylesheets/leaderboards.css
   - plugins/stylesheets/ppt-slides.css
 extra_javascript:
   - plugins/javascripts/toc-collapse.js

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import html
 import json
 import os
 import re
@@ -18,8 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
-from urllib.parse import urlparse
+from urllib.parse import quote, urlencode, urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 
@@ -1009,6 +1009,14 @@ def markdown_escape(value: Any) -> str:
     return text.replace("|", "\\|").replace("\n", " ")
 
 
+def html_escape(value: Any) -> str:
+    return html.escape(str(value), quote=True)
+
+
+def github_profile_url(github_id: str) -> str:
+    return f"https://github.com/{quote(github_id, safe='')}"
+
+
 def public_record(record: dict[str, Any]) -> dict[str, Any]:
     return {field: record[field] for field in PUBLIC_RECORD_FIELDS if field in record}
 
@@ -1077,6 +1085,115 @@ def render_direction_links(directions: list[Direction], active_key: str) -> str:
     return " | ".join(links)
 
 
+def render_direction_tabs(directions: list[Direction], active_key: str) -> str:
+    lines = ['<nav class="qemu-leaderboard-tabs" aria-label="排行榜切换">']
+    for direction in directions:
+        active = direction.key == active_key
+        class_name = "qemu-leaderboard-tabs__item is-active" if active else "qemu-leaderboard-tabs__item"
+        current = ' aria-current="page"' if active else ""
+        lines.append(
+            f'  <a class="{class_name}" href="{html_escape(direction.page)}"{current}>{html_escape(direction.title)}</a>'
+        )
+    lines.append("</nav>")
+    return "\n".join(lines)
+
+
+def format_score(value: Any) -> str:
+    try:
+        return f"{float(value):g}"
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def score_percent(score: Any, total_score: Any) -> float:
+    try:
+        score_value = float(score)
+        total_value = float(total_score)
+    except (TypeError, ValueError):
+        return 0.0
+    if total_value <= 0:
+        return 0.0
+    return min(max(score_value / total_value * 100, 0.0), 100.0)
+
+
+def render_leaderboard_card(
+    rows: list[dict[str, Any]],
+    direction: Direction,
+    generated_at: str | None,
+) -> str:
+    if not rows:
+        return '<div class="qemu-leaderboard qemu-leaderboard--empty">当前快照没有可展示的排名结果。</div>'
+
+    full_score_count = sum(
+        1 for row in rows if float(row["total_score"]) > 0 and float(row["score"]) >= float(row["total_score"])
+    )
+    highest = max(rows, key=lambda row: float(row["score"]))
+    highest_score = f"{format_score(highest['score'])}/{format_score(highest['total_score'])}"
+
+    lines = [
+        '<section class="qemu-leaderboard" aria-label="排行榜">',
+        '  <div class="qemu-leaderboard__header">',
+        "    <div>",
+        f'      <div class="qemu-leaderboard__title">{html_escape(direction.stage_title)} · {html_escape(direction.title)}</div>',
+        '      <div class="qemu-leaderboard__subtitle">每天刷新一次</div>',
+        "    </div>",
+        f'    <div class="qemu-leaderboard__updated">快照生成时间：{html_escape(format_time(generated_at))}</div>',
+        "  </div>",
+        '  <div class="qemu-leaderboard__metrics">',
+        '    <div class="qemu-leaderboard__metric qemu-leaderboard__metric--primary">',
+        f'      <span class="qemu-leaderboard__metric-value">{len(rows)}</span>',
+        '      <span class="qemu-leaderboard__metric-label">上榜人数</span>',
+        "    </div>",
+        '    <div class="qemu-leaderboard__metric">',
+        f'      <span class="qemu-leaderboard__metric-value">{full_score_count}</span>',
+        '      <span class="qemu-leaderboard__metric-label">满分人数</span>',
+        "    </div>",
+        '    <div class="qemu-leaderboard__metric">',
+        f'      <span class="qemu-leaderboard__metric-value">{html_escape(highest_score)}</span>',
+        '      <span class="qemu-leaderboard__metric-label">最高得分</span>',
+        "    </div>",
+        "  </div>",
+        '  <div class="qemu-leaderboard__scroll">',
+        '    <div class="qemu-leaderboard__list-head" aria-hidden="true">',
+        "      <span>排名</span>",
+        "      <span>GitHub ID</span>",
+        "      <span>得分</span>",
+        "    </div>",
+        '    <ol class="qemu-leaderboard__rows">',
+    ]
+    for row in rows:
+        rank = row["rank"]
+        github_id = str(row["github_id"])
+        score = float(row["score"])
+        total_score = float(row["total_score"])
+        run_time = format_time(row.get("run_time") or row.get("completion_time"))
+        percent = score_percent(score, total_score)
+        top_class = " qemu-leaderboard__row--top" if rank and int(rank) <= 3 else ""
+        lines.extend([
+            (
+                f'      <li class="qemu-leaderboard__row{top_class}" data-rank="{html_escape(rank)}" '
+                f'data-github-id="{html_escape(github_id)}" data-score="{format_score(score)}" '
+                f'data-total-score="{format_score(total_score)}" data-run-time="{html_escape(run_time)}">'
+            ),
+            f'        <span class="qemu-leaderboard__rank">{html_escape(rank)}</span>',
+            (
+                f'        <span class="qemu-leaderboard__name"><a href="{html_escape(github_profile_url(github_id))}" '
+                f'target="_blank" rel="noopener noreferrer">{html_escape(github_id)}</a></span>'
+            ),
+            '        <span class="qemu-leaderboard__score">',
+            f'          <span><strong>{format_score(score)}</strong><small>/{format_score(total_score)}</small></span>',
+            f'          <span class="qemu-leaderboard__bar"><span style="width: {percent:.2f}%"></span></span>',
+            "        </span>",
+            "      </li>",
+        ])
+    lines.extend([
+        "    </ol>",
+        "  </div>",
+        "</section>",
+    ])
+    return "\n".join(lines)
+
+
 def render_direction_page(
     snapshot: dict[str, Any],
     direction: Direction,
@@ -1094,34 +1211,11 @@ def render_direction_page(
     lines: list[str] = [
         f"# QEMU 训练营 2026 {direction.stage_title} {direction.title}{title_suffix}",
         "",
-        render_direction_links(directions, direction.key),
+        render_direction_tabs(directions, direction.key),
         "",
     ]
 
-    if rows:
-        lines.extend([
-            "| 排名 | GitHub ID | 得分 | 总分 | 评分 run 时间 |",
-            "| --- | --- | ---: | ---: | --- |",
-        ])
-        for row in rows:
-            github_id = markdown_escape(row["github_id"])
-            lines.append(
-                "| {rank} | {github_id} | {score:g} | {total:g} | {time} |".format(
-                    rank=row["rank"],
-                    github_id=github_id,
-                    score=float(row["score"]),
-                    total=float(row["total_score"]),
-                    time=format_time(row.get("run_time") or row.get("completion_time")),
-                )
-            )
-    else:
-        lines.append("当前快照没有可展示的排名结果。")
-
-    lines.extend([
-        "",
-        f"每天刷新一次｜快照生成时间：{format_time(metadata.get('generated_at'))}",
-    ])
-
+    lines.append(render_leaderboard_card(rows, direction, metadata.get("generated_at")))
     lines.append("")
     text = "\n".join(lines)
     (output_dir / direction.page).write_text(text, encoding="utf-8")
@@ -1164,6 +1258,54 @@ def parse_score(value: str) -> float | None:
         return None
 
 
+LEADERBOARD_ROW_RE = re.compile(
+    r'<li class="qemu-leaderboard__row[^"]*"'
+    r'[^>]*data-rank="(?P<rank>[^"]*)"'
+    r'[^>]*data-github-id="(?P<github_id>[^"]*)"'
+    r'[^>]*data-score="(?P<score>[^"]*)"'
+    r'[^>]*data-total-score="(?P<total_score>[^"]*)"'
+    r'[^>]*data-run-time="(?P<run_time>[^"]*)"',
+    re.S,
+)
+
+
+def parse_rank(value: str) -> int | None:
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
+
+def rendered_page_generated_at(page_text: str) -> str:
+    generated_match = re.search(r"快照生成时间：\s*([^<\n]+)", page_text)
+    if not generated_match:
+        return ""
+    parsed = parse_time(generated_match.group(1).strip())
+    if parsed == datetime.max.replace(tzinfo=timezone.utc):
+        return ""
+    return parsed.isoformat().replace("+00:00", "Z")
+
+
+def rendered_page_html_rows(page_text: str, direction: Direction) -> list[dict[str, Any]]:
+    ranked: list[dict[str, Any]] = []
+    for match in LEADERBOARD_ROW_RE.finditer(page_text):
+        score = parse_score(html.unescape(match.group("score")))
+        total_score = parse_score(html.unescape(match.group("total_score")))
+        if score is None or total_score is None:
+            continue
+        ranked.append({
+            "stage": direction.stage,
+            "direction": direction.key,
+            "rank": parse_rank(html.unescape(match.group("rank"))),
+            "github_id": html.unescape(match.group("github_id")),
+            "score": score,
+            "total_score": total_score,
+            "run_time": html.unescape(match.group("run_time")),
+            "completion_time": "",
+        })
+    return ranked
+
+
 def load_snapshot_from_rendered_pages(config: dict[str, Any], root: Path) -> dict[str, Any] | None:
     ranked: list[dict[str, Any]] = []
     generated_at = ""
@@ -1173,7 +1315,14 @@ def load_snapshot_from_rendered_pages(config: dict[str, Any], root: Path) -> dic
             page = output_dir / direction.page
             if not page.exists():
                 continue
-            for line in page.read_text(encoding="utf-8").splitlines():
+            page_text = page.read_text(encoding="utf-8")
+            if not generated_at:
+                generated_at = rendered_page_generated_at(page_text)
+            html_rows = rendered_page_html_rows(page_text, direction)
+            if html_rows:
+                ranked.extend(html_rows)
+                continue
+            for line in page_text.splitlines():
                 if line.startswith("每天刷新一次｜快照生成时间：") and not generated_at:
                     display_time = line.split("：", 1)[1].strip()
                     parsed = parse_time(display_time)
@@ -1188,14 +1337,10 @@ def load_snapshot_from_rendered_pages(config: dict[str, Any], root: Path) -> dic
                 total_score = parse_score(columns[3])
                 if score is None or total_score is None:
                     continue
-                try:
-                    rank = int(columns[0])
-                except ValueError:
-                    rank = None
                 ranked.append({
                     "stage": direction.stage,
                     "direction": direction.key,
-                    "rank": rank,
+                    "rank": parse_rank(columns[0]),
                     "github_id": columns[1],
                     "score": score,
                     "total_score": total_score,
@@ -1603,9 +1748,17 @@ def self_test() -> None:
         changed_content["ranked"][0]["score"] = float(changed_content["ranked"][0]["score"]) + 1
         assert leaderboard_content_changed(changed_content, public)
         page = (root / "pages" / "cpu.md").read_text(encoding="utf-8")
-        assert "qemu-camp-2026-exper" not in page.split("| GitHub ID |", 1)[-1]
+        assert "qemu-camp-2026-exper" not in page
         assert "bob" in page and "alice" in page
-        assert "每天刷新一次｜快照生成时间：" in page
+        assert "qemu-leaderboard" in page
+        assert "快照生成时间：" in page
+        assert "qemu-leaderboard__list-head" in page
+        assert "<span>排名</span>" in page
+        assert "<span>GitHub ID</span>" in page
+        assert "<span>得分</span>" in page
+        assert "评分 run 时间" not in page
+        assert "qemu-leaderboard__score" in page
+        assert "data-score=" in page and "data-run-time=" in page
         rendered_snapshot = load_snapshot_from_rendered_pages(config, root)
         assert rendered_snapshot is not None
         assert {item["github_id"] for item in rendered_snapshot["ranked"]} == {"alice", "bob"}
