@@ -518,6 +518,7 @@ body:has(.home-page) .md-content__inner > h1:first-child {
       <p class="home-hero__desc">以模拟器/虚拟化技术为底座的 CPU/GPGPU 体系结构相关的开放学习与实践平台，全程免费，资料开源，社区共建。</p>
       <div class="home-hero__actions">
         <a class="home-button home-button--primary" href="tutorial/2026/">开始学习</a>
+        <a class="home-button" href="tutorial/2026/enroll/">GitHub 报名</a>
         <a class="home-button" href="exercise/2026/">查看实验</a>
       </div>
     </div>
