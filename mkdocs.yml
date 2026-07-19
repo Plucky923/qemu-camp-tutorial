@@ -96,10 +96,10 @@ extra_javascript:
 
 nav:
   - 主页: index.md
+  - GitHub 报名: enroll.md
   - 讲义:
     - QEMU 训练营 2026:
       - 训练营介绍: tutorial/2026/index.md
-      - GitHub 报名: tutorial/2026/enroll.md
       - 1. 导学阶段:
         - 本章导览: tutorial/2026/ch0/index.md
         - a. QEMU 开发环境搭建: tutorial/2026/ch0/qemu-dev-env.md

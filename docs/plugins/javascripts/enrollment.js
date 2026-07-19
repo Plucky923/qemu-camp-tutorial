@@ -1,13 +1,47 @@
 (function () {
     "use strict";
 
-    function isLocalhost() {
-        return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    function getApiBase(config) {
+        return (config.api_base || "").replace(/\/$/, "");
     }
 
-    function getApiBase(component) {
-        var value = isLocalhost() ? component.dataset.localApiBase : component.dataset.apiBase;
-        return (value || "").replace(/\/$/, "");
+    function loadConfig(component) {
+        var configUrl = component.dataset.enrollmentConfig;
+        if (!configUrl) {
+            return Promise.reject(new Error("Enrollment config URL is missing"));
+        }
+
+        return fetch(new URL(configUrl, window.location.href), {
+            cache: "no-cache",
+            headers: { Accept: "application/json" }
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Enrollment config returned " + response.status);
+                }
+                return response.json();
+            })
+            .then(function (config) {
+                var year = Number(config.current_year);
+                var availableYears = Array.isArray(config.available_years)
+                    ? config.available_years.map(Number)
+                    : [];
+                if (!Number.isInteger(year) || availableYears.indexOf(year) === -1) {
+                    throw new Error("Current enrollment year is invalid");
+                }
+                if (!config.program_name || !getApiBase(config)) {
+                    throw new Error("Enrollment config is incomplete");
+                }
+                config.current_year = year;
+                return config;
+            });
+    }
+
+    function applyConfig(component, config) {
+        var camp = component.querySelector("[data-enrollment-camp]");
+        if (camp) {
+            camp.textContent = config.program_name + " " + config.current_year;
+        }
     }
 
     function setStatus(component, message, state) {
@@ -61,7 +95,7 @@
         result.dataset.state = state || "idle";
     }
 
-    function initLookup(component, apiBase) {
+    function initLookup(component, apiBase, currentYear) {
         var form = component.querySelector("[data-enrollment-lookup]");
         if (!form) {
             return;
@@ -93,10 +127,14 @@
                 })
                 .then(function (payload) {
                     if (payload.enrolled) {
-                        setLookupResult(component, "@" + payload.login + " 已报名", "success");
+                        setLookupResult(
+                            component,
+                            "@" + payload.login + " 已报名 " + (payload.year || currentYear) + " 届",
+                            "success"
+                        );
                         return;
                     }
-                    setLookupResult(component, "@" + login + " 尚未报名", "idle");
+                    setLookupResult(component, "@" + login + " 尚未报名 " + currentYear + " 届", "idle");
                 })
                 .catch(function () {
                     setLookupResult(component, "查询失败，请稍后重试", "error");
@@ -113,19 +151,27 @@
         }
         component.dataset.enrollmentInit = "true";
 
-        var apiBase = getApiBase(component);
         var action = component.querySelector("[data-enrollment-action]");
-        if (!apiBase || !action) {
+        if (!action) {
             setStatus(component, "报名入口配置不完整", "offline");
             return;
         }
 
-        action.href = apiBase + "/auth/github";
-        if (new URLSearchParams(window.location.search).get("enrollment") === "success") {
-            setStatus(component, "报名成功，正在同步状态...", "success");
-        }
-        initLookup(component, apiBase);
-        refreshEnrollment(component, apiBase);
+        loadConfig(component)
+            .then(function (config) {
+                var apiBase = getApiBase(config);
+                applyConfig(component, config);
+                action.href = apiBase + "/auth/github";
+                action.removeAttribute("aria-disabled");
+                if (new URLSearchParams(window.location.search).get("enrollment") === "success") {
+                    setStatus(component, "报名成功，正在同步状态...", "success");
+                }
+                initLookup(component, apiBase, config.current_year);
+                return refreshEnrollment(component, apiBase);
+            })
+            .catch(function () {
+                setStatus(component, "报名配置加载失败", "offline");
+            });
     }
 
     function init(root) {
