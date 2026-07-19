@@ -1,10 +1,10 @@
 # GPGPU博客
 
-\!\!\! note "主要贡献者"
+!!! note "主要贡献者"
 
-    \- 作者：\[@Old\-cpu\]\(https://github\.com/Old\-cpu\)
+    - 作者：[@Old-cpu](https://github.com/Old-cpu)
 
-\-\-\-
+---
 
 ## 背景介绍
 
