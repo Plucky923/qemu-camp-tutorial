@@ -1,6 +1,8 @@
-# 基于勘智 K230 卫星星务计算单元的 QEMU 建模
+# 数字星务计算机
 
-!!! tip "项目简介"
+本文介绍 K230 星务计算单元项目需要的背景知识，包括 QEMU `k230` machine 的上游基线、启动链路、外设建模关注点和 QEMU 邮件列表协作方式。具体项目任务与考核标准见[数字星务计算机项目][project-task]。
+
+!!! tip "技术背景"
 
     星务计算单元是人造卫星星务分系统的核心计算模块，完成遥测数据的采集和下传、星上网络管理、平台实践管理、整星安全等卫星的核心功能，并具备在轨程序注入的能力。基于中高端物联网芯片 Kendryte K230，RISC-V 开源的星务计算机将具有广阔的应用场景。本次任务专注于使用 K230 星务计算单元的硬件建模，将从 K230 的基本支持出发，直到能够支持星务系统基本安全模块的正常运转。
 
@@ -30,6 +32,17 @@
 
     对本项目来说，已合入的 `k230` machine 提供了 K230 QEMU 建模的上游基线。后续 RustSBI 适配、外设模型补全、安全实验支撑等工作，应尽量基于该上游实现继续演进，并按 QEMU 社区规范整理 patch 和测试结果。
 
+## 从 machine 基线继续开发
+
+已合入的 `k230` machine 不是完整芯片模型，而是后续工作的起点。阅读和扩展这类 machine 时，可以按以下层次理解：
+
+1. CPU 与启动链路：确认 CPU 型号、复位地址、BootROM、SBI、U-Boot / Linux 和 DTB 的传递关系。
+2. 地址空间与中断：对照 SoC 手册确认内存布局、MMIO 区间、PLIC / CLINT 连接和设备 IRQ。
+3. 外设最小模型：先实现系统软件实际访问的寄存器、reset 值与必要行为，再逐步补充完整功能。
+4. 可验证性：为模型保留 trace 事件、QTest、启动日志和异常路径，保证行为能够被观察与复现。
+
+建议先复习[主板建模流程][qemu-machine]、[外设建模流程][qemu-hw]、[模拟中断和异常][qemu-intr]和[常用调试方法][qemu-debug]。
+
 !!! important "K230 相关成果上游贡献"
 
     完成 K230 QEMU 相关 Issue 后，请不要只停留在本仓库 PR 或 fork 仓库中。将可合入 QEMU 的改动整理为 patch series，直接发送到 `qemu-devel@nongnu.org` 和 `qemu-riscv@nongnu.org` 邮件列表，并根据 `scripts/get_maintainer.pl` 与 `MAINTAINERS` 抄送对应维护者和 reviewer。
@@ -48,38 +61,18 @@
 
     实际发送 patch 前，建议在 QEMU 源码树中运行 `scripts/get_maintainer.pl <patchfile>`，用脚本根据改动文件自动生成最新收件人和抄送列表，再结合 `MAINTAINERS` 手动确认。
 
-!!! note "项目方向"
+QEMU 相关代码贡献请参考 [QEMU Submitting a Patch](https://www.qemu.org/docs/master/devel/submitting-a-patch.html) 和 [QEMU Coding Style](https://www.qemu.org/docs/master/devel/style.html)。准备 patch 时需要注意：
 
-    项目仓库：[gevico/qemu-camp-2026-k230.git](https://github.com/gevico/qemu-camp-2026-k230.git)
+1. 基于 QEMU 当前 `master` 分支开发，避免基于旧版本提交无法合入的 patch。
+2. 将改动拆分为逻辑清晰的 patch series，每个 patch 都应能独立编译和验证；不要混入无关格式化、空白或重构改动。
+3. Commit message 使用 `subsystem: single line summary` 格式，说明改动原因；每个提交必须包含 `Signed-off-by: Your Name <email>`。
+4. 提交前运行 `scripts/checkpatch.pl <patchfile>`，并完成对应的构建、单元测试、QTest 或集成验证。
+5. 使用 `git format-patch` / `git send-email`、`b4` 或 `git-publish` 生成并发送邮件形式的 patch，不要以附件方式发送。
+6. Patch 发送到 `qemu-devel@nongnu.org` 和 `qemu-riscv@nongnu.org`，并通过 `MAINTAINERS` 或 `scripts/get_maintainer.pl` 抄送相关维护者。
+7. 保持参与 review，按反馈修订后使用 `v2`、`v3` 等版本号重新发送，并在 cover letter 或 patch 注释中说明版本变化。
 
-    1. RustSBI 适配 K230
-        - 适配 K230 启动流程、内存布局和 DTB 传递。
-        - 在 QEMU `k230` machine 下完成从 BootROM、RustSBI 到下一阶段 U-Boot / Linux 的启动验证。
-        - 相关适配成果期望直接贡献到 [rustsbi/rustsbi.git](https://github.com/rustsbi/rustsbi.git)。
-    2. 完善 K230 外设建模
-        - 围绕 Timer、RTC、GPIO、I2C、SPI、PWM、SD/eMMC、Mailbox 等外设补充 QEMU 模型。
-        - 按照 Issue 认领任务，补充 MMIO、IRQ / 中断、reset 行为、trace 支持和测试用例。
-        - 优先实现 SDK 或系统软件会访问的寄存器与功能，从最小可用模型开始渐进完善。
-    3. 面向星务安全模块的仿真支撑
-        - 构建可观测、可注入、可验证的最小安全实验场景。
-        - 通过 trace、QMP、GDB、QTest 等工具观察关键寄存器、事件、中断和 MMIO 访问行为。
-        - 支持篡改关键数据或寄存器、触发 Watchdog 超时、模拟中断风暴或丢失、存储 / 通信异常注入等实验，并验证检测、响应与恢复流程。
-
-!!! question "考核标准"
-
-    1. 可运行代码：主要功能正确，能够在 K230 QEMU 环境中运行并完成对应方向的验证。
-    2. 测试与验证：提供单元测试或集成测试，覆盖正常场景和必要的异常场景，保留可复现的验证日志。
-    3. 工程质量：代码风格符合 QEMU / RustSBI 等相关项目规范，注释清晰，提交记录和 Issue / PR 进展可追踪。
-    4. 进阶成果加分：性能优化、故障注入与恢复验证、自动化回归测试、整理 patch 并尝试向上游贡献。
-
-!!! info "QEMU 上游"
-
-    QEMU 相关代码贡献请参考 [QEMU Submitting a Patch](https://www.qemu.org/docs/master/devel/submitting-a-patch.html) 和 [QEMU Coding Style](https://www.qemu.org/docs/master/devel/style.html)，本项目按以下标准准备 patch：
-
-    1. 基于 QEMU 当前 `master` 分支开发，避免基于旧版本提交无法合入的 patch。
-    2. 将改动拆分为逻辑清晰的 patch series，每个 patch 都应能独立编译和验证；不要混入无关格式化、空白或重构改动。
-    3. Commit message 使用 `subsystem: single line summary` 格式，说明改动原因；每个提交必须包含 `Signed-off-by: Your Name <email>`。
-    4. 提交前运行 `scripts/checkpatch.pl <patchfile>`，并完成对应的构建、单元测试、QTest 或集成验证。
-    5. 使用 `git format-patch` / `git send-email`、`b4` 或 `git-publish` 生成并发送邮件形式的 patch，不要以附件方式发送。
-    6. Patch 发送到 `qemu-devel@nongnu.org` 和 `qemu-riscv@nongnu.org`，并通过 `MAINTAINERS` 或 `scripts/get_maintainer.pl` 抄送相关维护者。
-    7. 保持参与 review，按反馈修订后使用 `v2`、`v3` 等版本号重新发送，并在 cover letter 或 patch 注释中说明版本变化。
+[project-task]: ../../../exercise/2026/stage3/qemu-k230.md
+[qemu-debug]: ../ch1/qemu-debug.md
+[qemu-hw]: ../ch2/qemu-hw.md
+[qemu-intr]: ../ch2/qemu-intr.md
+[qemu-machine]: ../ch2/qemu-machine.md

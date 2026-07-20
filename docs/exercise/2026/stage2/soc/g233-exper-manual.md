@@ -372,5 +372,5 @@ qemu-system-riscv64 -M g233 \
 [2]: https://github.com/riscv-collab/riscv-gnu-toolchain/releases/
 [3]: https://classroom.github.com/a/hwWFrmo_
 [4]: ../../../../leaderboards/2026/professional/soc.md
-[5]: https://qemu.gevico.online/exercise/2026/stage1/soc/g233-datasheet/
+[5]: https://qemu.gevico.online/exercise/2026/stage2/soc/g233-datasheet/
 [6]: https://rust-lang.org/zh-CN/tools/install/

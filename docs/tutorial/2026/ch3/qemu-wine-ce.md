@@ -1,6 +1,8 @@
-# 基于 Wine-CE 的 RISC-V 硬件适配 x86 应用/游戏
+# 应用跨平台转译
 
-!!! tip "项目简介"
+本文介绍 Wine-CE 中 Windows 兼容层、动态二进制翻译组件与宿主系统的协作关系。具体版本升级、应用测评和 RISC-V 支持任务见[应用跨平台转译项目][project-task]。
+
+!!! tip "技术背景"
 
     Wine-CE（Chimera Edition，跨架构模拟器）是在非 x86 Linux 平台（如 RISC-V、ARM64）上运行 Windows 程序的兼容层。它基于 Wine、Box64 和 QEMU user 组件协作完成，只模拟客端指令架构相关的 Windows 动态链接库和 loader，并将针对 Unix 库的调用转发到主端执行。
 
@@ -57,47 +59,28 @@
     3. QEMU user / Box64 负责客端指令架构的加载与动态翻译。
     4. Wine drivers、Unix 库和 Linux 内核负责宿主侧能力提供。
 
-!!! note "项目方向"
+## 如何定位问题所在层
 
-    项目仓库（GitHub 镜像）：[fan-wenjie/wine-ce](https://github.com/fan-wenjie/wine-ce)
+跨架构应用失败时，不应把所有问题都归因于“模拟器不兼容”。可以按边界逐层定位：
 
-    本项目分为三个方向推进：
+1. Loader 是否正确识别并装载了 Windows 可执行文件及其依赖。
+2. Windows API 是否在 Wine 的 DLL 与 server 侧得到正确实现。
+3. Guest 指令是否由 QEMU user / Box64 正确翻译，系统调用和信号上下文是否正确转换。
+4. 宿主侧图形、音频、输入和 libc 等共享库是否满足程序需要。
 
-    1. QEMU / Box64 / Wine 版本更新
-        - 升级三大子模块，保证 RISC-V64 全量构建通过。
-        - 在 RISC-V64 环境中执行 `build_all.sh` / deb 包构建，修复编译、链接和运行时问题。
-        - 交付可构建、可安装的 wine-ce 包、版本升级说明和回归测试记录。
-    2. Windows 应用 / 游戏扩展测评与问题修复
-        - 在 RISC-V 平台上尽可能多地尝试运行 Windows 应用与游戏，记录启动、主界面、可用性和报错情况。
-        - 针对失败或体验异常项进行分析和修复，能修则修，并提交 PR；暂不能修则记录 workaround 和 issue。
-        - 将跑通或部分跑通的程序整理成标准测试 Demo，形成可复现、可演示的测试集合。
-    3. Wine RISC-V 支持完善
-        - 补齐 `wine/dlls/ntdll/unix/signal_riscv64.c` 中的关键 stub，提升 RISC-V 宿主机能力。
-        - 对标 `signal_arm64.c` 的完整实现，逐步缩小与 ARM64 的能力差距。
-        - 交付对应补丁、单元 / 集成测试记录，以及与 ARM64 的能力对比说明。
+记录问题时，应同时保存应用版本、Wine-CE 版本、宿主架构、运行参数、日志和最小复现步骤。这样才能判断修复应进入 Wine、QEMU、Box64，还是打包与环境配置层。
 
-!!! info "协作方式"
+## 需要复习的讲义
 
-    个人独立完成或协作完成均可。建议围绕一个清晰、可复现的闭环推进：先完成版本升级与基础构建，再扩展应用 / 游戏测评，最后把宿主机能力补齐到可维护、可调试的状态。
+- [虚拟技术历史][vm-history]：区分虚拟化、系统模拟和用户态模拟。
+- [TCG 工作原理][qemu-tcg]：理解 Guest 指令到 Host 指令的动态翻译过程。
+- [模拟客户机指令][qemu-insn]：理解 QEMU 前端如何解码并生成 TCG 操作。
+- [常用调试方法][qemu-debug]：建立跨组件日志与调试习惯。
 
-!!! info "Issue / PR 流程"
+项目代码可从 [fan-wenjie/wine-ce](https://github.com/fan-wenjie/wine-ce) 获取。阅读仓库时，建议先确认各子模块版本与构建脚本，再沿一次最小应用启动过程梳理组件边界。
 
-    本项目建议按 Issue 驱动协作，流程如下：
-
-    1. 浏览仓库 Issue 列表，选择一个明确的任务进行认领。
-    2. 在 Issue 中留言说明认领意图、实现思路和预期交付物，避免重复开工。
-    3. 创建对应分支完成开发，补充必要的构建、运行和回归测试。
-    4. 提交 PR 后，在描述中附上关联 Issue、复现步骤、验证结果和截图或日志。
-    5. 根据 Review 意见迭代修改，确认通过后由维护者合并到主分支。
-
-!!! question "考核标准"
-
-    1. 功能交付 40%：三个方向任务完成情况。
-    2. 代码质量 30%：PR 规范、可审查、可合并。
-    3. 测试与文档 30%：复现步骤、测试报告、演示材料完整。
-
-!!! info "交付物"
-
-    1. 项目总结报告：背景、方案、个人贡献、结果与不足。
-    2. 测试报告：环境配置、测试用例、日志 / 截图、演示 demo。
-    3. Gitee PR / Issue 链接清单：方便复现、审查和后续迭代。
+[project-task]: ../../../exercise/2026/stage3/qemu-wine-ce.md
+[qemu-debug]: ../ch1/qemu-debug.md
+[qemu-insn]: ../ch2/qemu-insn.md
+[qemu-tcg]: ../ch2/qemu-tcg.md
+[vm-history]: ../ch1/vm-history.md
