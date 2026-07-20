@@ -9,6 +9,7 @@
 > 这篇 blog 的内容是笔者完成 GPU 方向进阶实验 1 之后进行的一些技术探索，主要是个人的实验和理解，内容比较杂碎，随便看看就好。
 
 ---
+
 ## 1. cmodel
 
 > 在 QEMU 里跑 cmodel 性能太差了，能不能让它快一点？下面分析瓶颈，逐条优化。
@@ -80,7 +81,7 @@ dispatch 表的填充通过 YAML spec → Python 生成器 → `INSTRUCTION_LIST
 
 其实这里本来的设计是图优化，针对特定指令序列进行融合。换个角度想，自定义指令就是这个意思。
 
-**问题：锁步串行执行**
+#### 问题：锁步串行执行
 
 - **对策：** 使用线程池实现简单的 block 级并发（C 语言写并发很让人头痛，因此我把调度逻辑用 Go 重新写了一遍）。
 
@@ -148,7 +149,7 @@ dispatch 表的填充通过 YAML spec → Python 生成器 → `INSTRUCTION_LIST
         } \
     } while(0)
     ```
-	其他的诸如弃用 softfloat 库等就省略了。
+    其他的诸如弃用 softfloat 库等就省略了。
 
 （其实直接写 JIT 会更好，但是我不想，因为太难了……）
 
@@ -157,6 +158,7 @@ dispatch 表的填充通过 YAML spec → Python 生成器 → `INSTRUCTION_LIST
 在优化的过程中，也能轻易发现一些优化的取舍：算法优化（从 $O(n)$ 到 $O(n \log n)$）vs 硬件适配（设计 cache 友好的算法）——往往后者比前者提升大得多。
 
 ---
+
 ### 架构设计
 
 > 加入的指令集太多，直接手写 `computed-goto` 的 label handler 已经完全不可能——几百个 label、几千行代码，AI 读这种东西幻觉十分严重。于是我设计了一种”多级元编程”的方案。
@@ -226,6 +228,7 @@ Python 生成器扫描所有 ISA 的 YAML，收集每条指令的 decode 信息�
 代码已开源在 <https://github.com/random25160765-collab/little-gpu-cmodel>。
 
 ---
+
 ## 2. Vortex 和 POCL
 
 > 这部分是最早做的——当时还很缺乏驾驭一个 GitHub 项目的经验，只会问 AI，踩了非常多的坑。
@@ -275,6 +278,7 @@ Vortex 的架构在它的 Deepwiki 上已经讲的很清楚了，关于桥接的
 btw，近日更新的 vortex 3.0 实现了一大批新功能，覆盖了 AI 推理场景下的很多功能。详情可见 <https://github.com/vortexgpgpu/vortex/releases>
 
 ---
+
 ## 3. 可观测系统
 
 > 被跨层级的 bug 折磨得痛不欲生，或许我需要一个更友善、更先进的监控系统。
@@ -293,7 +297,7 @@ btw，近日更新的 vortex 3.0 实现了一大批新功能，覆盖了 AI 推�
 
 虽说”可观测系统”生态主要围绕云原生/分布式计算展开，现有项目的复杂度与之相差甚远；但监控和观测的基础设施对于小项目同样重要。借此我把 cmodel 的 trace 系统做了优化。
 
-**问题：指令级日志 I/O 开销大 + 不同速率的日志互相淹没**
+#### 问题：指令级日志 I/O 开销大 + 不同速率的日志互相淹没
 
 - **对策：** 使用无锁环形缓冲区 + 双通道设计。控制事件走 `slow_ring`，指令 trace 走 `fast_ring`，互不干扰：
 
@@ -389,4 +393,4 @@ static int create_server(const char *path)
 - [浅析虚拟机软件仿真中的解释技术](https://qemu.gevico.online/blogs/misc/simulater-interp/) — 泽文，线索解释 / computed-goto 思路来源
 - [QEMU GPGPU 模拟](https://qemu.gevico.online/tutorial/2026/ch2/qemu-gpgpu/) — 训练营讲义
 - [QEMU PCIe 模拟方法](https://qemu.gevico.online/tutorial/2026/ch2/qemu-pcie/) — 训练营讲义
-- [GPU 进阶实验](https://qemu.gevico.online/exercise/2026/stage1/gpu/) — 实验手册
+- [GPU 进阶实验](https://qemu.gevico.online/exercise/2026/stage2/gpu/) — 实验手册

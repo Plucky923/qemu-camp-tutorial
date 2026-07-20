@@ -1,6 +1,6 @@
 # QEMU 训练营练习（2026）
 
-本期 QEMU 训练营的练习，聚焦 QEMU 使用与 CPU、SoC、GPGPU 设备建模及 Rust 开发的实践任务，帮助你把讲义内容落到实际操作中。每个阶段都有多个方向，可以任选一个方向完成晋级，学有余力的情况下可以都试试。
+本期 QEMU 训练营的实验与项目，聚焦 QEMU 使用、CPU / SoC / GPGPU 设备建模、Rust 开发和真实开源项目协作，帮助你把讲义内容落到实际操作中。
 
 !!! note "基础阶段（二选一）"
 
@@ -9,16 +9,29 @@
 
 !!! tip "专业阶段（四选一）"
 
-    - [专业阶段实验总览][stage1-index]
+    - [专业阶段实验总览][stage2-index]
     - [CPU 建模实验][cpu-model]
     - [SoC 建模实验][soc-model]
     - [GPGPU 建模实验][gpgpu-model]
     - [Rust 建模实验][rust-model]
 
-[learning-c]: stage0/learning-c.md
-[learning-rust]: stage0/learning-rust.md
-[stage1-index]: stage1/index.md
-[cpu-model]: stage1/cpu/index.md
-[soc-model]: stage1/soc/index.md
-[gpgpu-model]: stage1/gpu/index.md
-[rust-model]: stage1/rust/index.md
+!!! important "项目阶段"
+
+    - [项目阶段总览][stage3-index]
+    - [数字星务计算机][k230-project]
+    - [建模 AI 加速卡][cxlemu-project]
+    - [大模型建模外设][agent-project]
+    - [应用跨平台转译][wine-ce-project]
+
+[learning-c]: stage1/learning-c.md
+[learning-rust]: stage1/learning-rust.md
+[stage2-index]: stage2/index.md
+[cpu-model]: stage2/cpu/index.md
+[soc-model]: stage2/soc/index.md
+[gpgpu-model]: stage2/gpu/index.md
+[rust-model]: stage2/rust/index.md
+[stage3-index]: stage3/index.md
+[k230-project]: stage3/qemu-k230.md
+[cxlemu-project]: stage3/qemu-cxlemu.md
+[agent-project]: stage3/qemu-agent.md
+[wine-ce-project]: stage3/qemu-wine-ce.md

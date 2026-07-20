@@ -15,9 +15,9 @@
 
 基础阶段提供 C 语言和 Rust 两个方向的编程练习，二选一完成即可：
 
-- [基础阶段实验总览](../../../exercise/2026/stage0/index.md)
-- [C 语言习题](../../../exercise/2026/stage0/learning-c.md)
-- [Rust 习题](../../../exercise/2026/stage0/learning-rust.md)
+- [基础阶段实验总览](../../../exercise/2026/stage1/index.md)
+- [C 语言习题](../../../exercise/2026/stage1/learning-c.md)
+- [Rust 习题](../../../exercise/2026/stage1/learning-rust.md)
 
 !!! warning "晋级条件"
 
