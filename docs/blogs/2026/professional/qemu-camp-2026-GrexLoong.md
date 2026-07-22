@@ -120,7 +120,7 @@ RISC-V 32-bit 指令字
 ```c
 static bool trans_vdot(DisasContext *ctx, arg_r *a)
 {
-    TCGv rd    = get_gpr(ctx, a->rd,  EXT_NONE);   // 读 rd 寄存器的值
+    TCGv rd    = dest_gpr(ctx, a->rd);             // 创建 rd 的写入目标
     TCGv src_a = get_gpr(ctx, a->rs1, EXT_NONE);   // 读 rs1（向量 A 地址）
     TCGv src_b = get_gpr(ctx, a->rs2, EXT_NONE);   // 读 rs2（向量 B 地址）
     gen_helper_vdot(rd, tcg_env, src_a, src_b);     // 生成 helper 调用
@@ -129,7 +129,7 @@ static bool trans_vdot(DisasContext *ctx, arg_r *a)
 }
 ```
 
-`get_gpr` 从 RISC-V 寄存器文件中读出 rd/rs1/rs2 的值，放入 TCG 临时变量。`gen_helper_vdot` 生成一行 TCG IR，表示"调用 helper_vdot，传入这 4 个参数"。`gen_set_gpr` 把 helper 返回的结果写回 RISC-V 寄存器文件。
+这里有一个容易忽略的细节：rd 用的是 `dest_gpr` 而非 `get_gpr`。`get_gpr` 读取寄存器的当前值，适合 rs1、rs2 这种只读的操作数。`dest_gpr` 为写入目标创建一个新的临时变量——当 rd 恰好是 RISC-V 的零寄存器（x0）时，`dest_gpr` 会返回一个可安全丢弃的临时值，后续 `gen_set_gpr` 能正确处理"写入 x0 即丢弃"的语义。这是 QEMU RISC-V translator 的标准范式：读用 `get_gpr`，写用 `dest_gpr`。
 
 这里藏着 10 条指令中最重要的设计差异。vdot 和 vmax 是"归约型"——输入是内存中的数组，但输出是单个标量值，需要通过寄存器返回，所以 translate 层要多写一行 `gen_set_gpr`。其余 8 条是"内存操作型"——输入和输出都是内存中的数组，结果直接写到客户机内存里了，不需要回写寄存器。这个区分在 `helper.h` 的声明中也能一眼看出来：
 
@@ -140,15 +140,7 @@ DEF_HELPER_4(vrelu, void, env, tl, tl, tl)  // 内存操作型：返回 void，4
 
 **3.4 Helper 执行**
 
-`gen_helper_vdot` 最终调用 `xg233ai_helper.c` 中的 `HELPER(vdot)`。helper 运行在宿主机（x86）上，但操作的是客户机（RISC-V）内存。这里有一个无法绕过的核心概念：客户机内存不是宿主机的普通内存，不能直接用 C 指针解引用。QEMU 提供了 `cpu_memory_rw_debug` 这个 API 来做地址翻译和访问：
-
-```c
-int cpu_memory_rw_debug(CPUState *cs,    // CPU 状态
-                         vaddr addr,      // 客户机虚拟地址
-                         void *buf,       // 宿主机缓冲区
-                         int len,         // 字节数
-                         int is_write);   // 0 = 读, 1 = 写
-```
+`gen_helper_vdot` 最终调用 `xg233ai_helper.c` 中的 `HELPER(vdot)`。helper 运行在宿主机（x86）上，但操作的是客户机（RISC-V）内存，不能直接用 C 指针解引用。QEMU 为 helper 提供了 `cpu_ldl_data` / `cpu_stl_data` 系列函数来做正常的 guest 内存访问——它们会走完整的 MMU 翻译路径，在地址不合法时触发 guest 异常，行为与真实硬件一致：
 
 vdot 的完整 helper 实现如下：
 
@@ -156,41 +148,37 @@ vdot 的完整 helper 实现如下：
 target_ulong HELPER(vdot)(CPURISCVState *env, target_ulong a_addr,
                            target_ulong b_addr)
 {
-    CPUState *cs = env_cpu(env);
     int64_t acc = 0;
     for (int i = 0; i < 16; i++) {
-        uint32_t ua, ub;
-        cpu_memory_rw_debug(cs, a_addr + i * 4, &ua, sizeof(ua), 0);  // 读 A[i]
-        cpu_memory_rw_debug(cs, b_addr + i * 4, &ub, sizeof(ub), 0);  // 读 B[i]
-        acc += (int64_t)(int32_t)ua * (int64_t)(int32_t)ub;            // INT64 累加
+        int32_t ua = (int32_t)cpu_ldl_data(env, a_addr + i * 4);  // 读 A[i]
+        int32_t ub = (int32_t)cpu_ldl_data(env, b_addr + i * 4);  // 读 B[i]
+        acc += (int64_t)ua * (int64_t)ub;                           // INT64 累加
     }
     return (target_ulong)acc;
 }
 ```
 
-值得注意的是 `(int64_t)(int32_t)ua` 这个双重转换——先把无符号的 32 位值转为有符号 INT32（因为内存里存的是有符号整数），再扩展到 INT64 做乘法。累加器用 INT64 而非 INT32，因为 16 个 INT32 乘积的和可能远超 32 位范围。这种"宽累加器"的设计在真实芯片的向量点积指令里也是标准做法。
+注意累加器用了 INT64 而非 INT32——因为 16 个 INT32 乘积的和可能远超 32 位范围。`cpu_ldl_data` 返回的是 32 位无符号值，显式转为 `int32_t` 后再由编译器自动扩展到 INT64 参与乘法。这种"宽累加器"的设计在真实芯片的向量点积指令里也是标准做法。
 
-不同指令对客户机内存的访问策略也不一样。以 `sort` 为例，冒泡排序需要反复交换数组元素，如果每次 swap 都通过 `cpu_memory_rw_debug` 做两次读两次写，开销极大。helper 的做法是先用 GLib 的 `g_new` 在宿主机堆上分配一块临时内存，把整个数组读进来：
+不同指令对客户机内存的访问策略也不一样。以 `sort` 为例，冒泡排序需要反复交换数组元素，如果每次 swap 都要走 guest 内存访问，开销极大。helper 的做法是先用 GLib 的 `g_new` 在宿主机堆上分配一块临时内存，把整个数组读进来：
 
 ```c
 int32_t *A = g_new(int32_t, N);          // 宿主机临时缓冲区
 for (uint64_t i = 0; i < N; i++) {
-    cpu_memory_rw_debug(cs, addr + i*4, &val, 4, 0);
-    A[i] = (int32_t)val;                  // 批量读到宿主机
+    A[i] = (int32_t)cpu_ldl_data(env, addr + i * 4);  // 批量读到宿主机
 }
-// 在宿主机上做冒泡排序（纯 C，无 API 开销）
+// 在宿主机上做冒泡排序（纯 C，无访问开销）
 for (uint64_t i = 0; i < K - 1; i++)
     for (uint64_t j = 0; j < K - i - 1; j++)
         if (A[j] > A[j + 1]) { swap(A[j], A[j+1]); }
 // 排序完成后批量写回客户机内存
 for (uint64_t i = 0; i < N; i++) {
-    uint32_t val = (uint32_t)A[i];
-    cpu_memory_rw_debug(cs, addr + i*4, &val, 4, 1);
+    cpu_stl_data(env, addr + i * 4, (uint32_t)A[i]);  // 批量写回
 }
 g_free(A);
 ```
 
-这个"读入宿主 → 本地计算 → 写回客户"的三段式模式是所有 helper 的通用范式，也是理解从 helper 到后续可能的性能优化的基础。
+对于字节粒度的操作（如 `crush`），对应的函数是 `cpu_ldub_data`（读 8-bit）和 `cpu_stb_data`（写 8-bit）。
 
 ---
 
@@ -245,6 +233,6 @@ for (int i = 0; i < 16; i++) {
 
 ## 6. 总结
 
-来训练营之前，我对 QEMU 的理解基本上停留在"会用命令行启动虚拟机"。几周下来，从对着 R-type 编码表琢磨 opcode 和 funct7 的区别开始，到 decodetree 的模式匹配、translate 层的寄存器读写、helper 里用 `cpu_memory_rw_debug` 逐元素访问客户机内存，再到进阶实验里把 helper 替换成内联 TCG IR——一步步走过来，最大的变化不是会写某条指令了，而是对"QEMU 怎么执行指令"这件事有了一个完整的心理地图。
+来训练营之前，我对 QEMU 的理解基本上停留在"会用命令行启动虚拟机"。几周下来，从对着 R-type 编码表琢磨 opcode 和 funct7 的区别开始，到 decodetree 的模式匹配、translate 层的寄存器读写、helper 里用 `cpu_ldl_data` / `cpu_stl_data` 逐元素访问客户机内存，再到进阶实验里把 helper 替换成内联 TCG IR——一步步走过来，最大的变化不是会写某条指令了，而是对"QEMU 怎么执行指令"这件事有了一个完整的心理地图。
 
 实习中我要做的也是给自定义 RISC-V 指令写模拟支持，训练营教的 decode → translate → helper 这三层能直接用上。而且因为做过了进阶实验，知道 helper 这层不是死的，它可以是纯 C、可以是 TCG IR、也可以根据实际工程需要调整实现方式。这个"骨架不变、零件可换"的认识，大概是这次训练营专业阶段的学习对我最有用的收获。
