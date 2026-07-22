@@ -168,9 +168,11 @@ for (uint64_t i = 0; i < N; i++) {
     A[i] = (int32_t)cpu_ldl_data(env, addr + i * 4);  // 批量读到宿主机
 }
 // 在宿主机上做冒泡排序（纯 C，无访问开销）
-for (uint64_t i = 0; i < K - 1; i++)
-    for (uint64_t j = 0; j < K - i - 1; j++)
-        if (A[j] > A[j + 1]) { swap(A[j], A[j+1]); }
+if (K > 1) {
+    for (uint64_t i = 0; i < K - 1; i++)
+        for (uint64_t j = 0; j < K - i - 1; j++)
+            if (A[j] > A[j + 1]) { swap(A[j], A[j+1]); }
+}
 // 排序完成后批量写回客户机内存
 for (uint64_t i = 0; i < N; i++) {
     cpu_stl_data(env, addr + i * 4, (uint32_t)A[i]);  // 批量写回
