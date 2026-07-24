@@ -63,7 +63,7 @@
     2. 直接 fork 到个人账号在部分场景下会有权限限制，放自建组织里后续协作也更方便。
     3. 注意：GitHub Classroom 邀请链接会自动 fork 到 `gevico` 组织下，不需要自己选。
 
-    **Ref.** `docs/exercise/2026/stage1/index.md#获取实验仓库`
+    **Ref.** `docs/exercise/2026/stage2/index.md#获取实验仓库`
 
 ## OpenCamp 与 Classroom
 
@@ -78,7 +78,7 @@
     3. 绑定后需要再 push 一次触发 Action，或到 Actions 页面手动 Re-run。
     4. 仍然 0 分时：确认 CI 真的绿了，并检查是否生成 `test_results_summary.json`。
 
-    **Ref.** `docs/exercise/2026/stage0/index.md` · 群内 FAQ
+    **Ref.** `docs/exercise/2026/stage1/index.md` · 群内 FAQ
 
 !!! question "Q06 · Classroom 邀请链接 500 错误怎么办？"
 
@@ -117,7 +117,7 @@
     3. 进入项目阶段的条件：① 任一方向满分；② 贡献一篇总结博客。
     4. 博客路径：Fork `qemu-camp-tutorial` → `docs/blogs/2026/professional/qemu-camp-2026-<你的 GitHub 名>.md` → 在 `mkdocs.yml` 的 `训练营 2026 / 专业阶段` 下用 GitHub 名作为导航标题 → 提交 PR。
 
-    **Ref.** `docs/exercise/2026/stage1/index.md#晋级项目阶段`
+    **Ref.** `docs/exercise/2026/stage2/index.md#晋级项目阶段`
 
 !!! question "Q09 · git pull upstream 报 multiple branches？"
 
@@ -130,7 +130,7 @@
     3. 第四步非必须，本地能 build/test 即可，后续需要同步上游修复时再执行。
     4. 如仍报错，先 `git branch -a` 确认当前 main 分支是否存在，再重试 rebase。
 
-    **Ref.** `docs/exercise/2026/stage1/gpu/gpu-exper-manual.md` · 群内答疑（04-14 19:40）
+    **Ref.** `docs/exercise/2026/stage2/gpu/gpu-exper-manual.md` · 群内答疑（04-14 19:40）
 
 !!! question "Q10 · Ubuntu 20.04 能编译 GPU 实验吗？"
 
@@ -143,7 +143,7 @@
     3. 可以用 docker 起一个 `ubuntu:24.04` 容器，按 `gpu-exper-manual.md` 的依赖清单安装。
     4. 环境搞通后欢迎把流程补充到讲义仓库，成为新的贡献者。
 
-    **Ref.** `docs/exercise/2026/stage1/gpu/gpu-exper-manual.md#环境搭建`
+    **Ref.** `docs/exercise/2026/stage2/gpu/gpu-exper-manual.md#环境搭建`
 
 !!! question "Q11 · build 目录下测题 stdout 不显示？"
 
@@ -156,7 +156,7 @@
     3. 单独调试某题时，直接用 `qos-test -p 路径` 单独运行，终端会实时输出。
     4. 这是一个优化点 — 欢迎提 PR 让单题调试默认打印 stdout。
 
-    **Ref.** `docs/exercise/2026/stage1/gpu/gpu-exper-manual.md#测评验收`
+    **Ref.** `docs/exercise/2026/stage2/gpu/gpu-exper-manual.md#测评验收`
 
 ## 训练营组织与答疑
 
@@ -185,7 +185,7 @@
     3. 进入项目阶段会有专属导师带队。
     4. 方向包括：AI 加速硬件建模、CXLMemSim、hetGPU、machina（Rust QEMU 重写）等。
 
-    **Ref.** [bilibili BV1CSSQByEDB](https://www.bilibili.com/video/BV1CSSQByEDB) · <https://qemu.gevico.online/tutorial/2026/ch3>
+    **Ref.** [bilibili BV1CSSQByEDB](https://www.bilibili.com/video/BV1CSSQByEDB) · [项目阶段总览](../../../exercise/2026/stage3/index.md)
 
 !!! question "Q14 · 如何把博客推送到讲义网站？"
 
@@ -199,7 +199,7 @@
     4. PR 标题：`docs/blogs: add stage1 summary by <你的 GitHub 名>`。
     5. 审核合入后自动上站：<https://qemu.gevico.online/blogs/>。
 
-    **Ref.** `docs/exercise/2026/stage1/index.md#博客贡献流程`
+    **Ref.** `docs/exercise/2026/stage2/index.md#博客贡献流程`
 
 !!! question "Q15 · 导学阶段到什么时候？应该重点掌握什么？"
 
@@ -235,7 +235,7 @@
     1. 项目阶段整体截止到 `8` 月（以课程最终通知为准）。
     2. 建议按周推进里程碑，避免在截止前集中堆积任务。
 
-    **Ref.** `docs/tutorial/2026/ch3` · 群内答疑
+    **Ref.** `docs/exercise/2026/stage3` · 群内答疑
 
 !!! question "Q18 · 专业阶段有单独的群吗？"
 
@@ -259,7 +259,7 @@
     3. `SoC` 方向主要聚焦外设建模与 CPU 集成。
     4. 建议先选一个方向跑通完整流程，再决定是否扩展到其他方向。
 
-    **Ref.** `docs/exercise/2026/stage1` · 群内答疑
+    **Ref.** `docs/exercise/2026/stage2` · 群内答疑
 
 !!! question "Q20 · 专业阶段实验是只能考一次吗？"
 
@@ -270,7 +270,7 @@
     1. 专业阶段实验可以反复提交，不限制尝试次数。
     2. 建议每次提交前先本地自测并记录问题，迭代效率更高。
 
-    **Ref.** `docs/exercise/2026/stage1` · 群内答疑
+    **Ref.** `docs/exercise/2026/stage2` · 群内答疑
 
 !!! question "Q21 · 做完基础阶段题目后能直接做专业实验吗？"
 

@@ -46,10 +46,42 @@ body:has(.home-page) .md-content__inner > h1:first-child {
   --home-border: #e8e8e8;
   --home-shadow: 0 0.2rem 0.7rem rgba(0, 0, 0, 0.045);
   --home-shadow-hover: 0 0.45rem 0.8rem rgba(0, 0, 0, 0.12);
+  --home-hover-border: rgba(33, 150, 243, 0.45);
+  --home-hero-overlay-start: var(--home-card);
+  --home-hero-overlay-middle: rgba(255, 255, 255, 0.9);
+  --home-hero-overlay-end: rgba(255, 255, 255, 0.2);
+  --home-hero-overlay-mobile-middle: rgba(255, 255, 255, 0.92);
+  --home-hero-overlay-mobile-end: rgba(255, 255, 255, 0.4);
+  --home-partner-card: var(--home-card-soft);
+  --home-partner-card-hover: var(--home-primary-soft);
   --home-radius: 0.4rem;
   box-sizing: border-box;
   margin: 0 auto;
   max-width: 65.6rem;
+}
+
+[data-md-color-scheme="slate"] .home-page {
+  --home-primary: var(--md-accent-fg-color, #4287ff);
+  --home-primary-dark: #82b1ff;
+  --home-primary-soft: var(--md-accent-fg-color--transparent, rgba(66, 135, 255, 0.13));
+  --home-bg: var(--md-default-bg-color, #121318);
+  --home-card: hsla(var(--md-hue), 15%, 9%, 1);
+  --home-card-soft: hsla(var(--md-hue), 15%, 12%, 1);
+  --home-text: var(--md-default-fg-color);
+  --home-text-strong: hsla(var(--md-hue), 15%, 96%, 0.92);
+  --home-muted: var(--md-default-fg-color--light);
+  --home-subtle: hsla(var(--md-hue), 15%, 90%, 0.45);
+  --home-border: var(--md-default-fg-color--lightest);
+  --home-shadow: var(--md-shadow-z1);
+  --home-shadow-hover: var(--md-shadow-z2);
+  --home-hover-border: rgba(66, 135, 255, 0.55);
+  --home-hero-overlay-start: hsla(var(--md-hue), 15%, 9%, 1);
+  --home-hero-overlay-middle: hsla(var(--md-hue), 15%, 9%, 0.92);
+  --home-hero-overlay-end: hsla(var(--md-hue), 15%, 9%, 0.28);
+  --home-hero-overlay-mobile-middle: hsla(var(--md-hue), 15%, 9%, 0.94);
+  --home-hero-overlay-mobile-end: hsla(var(--md-hue), 15%, 9%, 0.58);
+  --home-partner-card: hsla(var(--md-hue), 12%, 88%, 1);
+  --home-partner-card-hover: hsla(var(--md-hue), 12%, 94%, 1);
 }
 
 .home-hero {
@@ -65,7 +97,7 @@ body:has(.home-page) .md-content__inner > h1:first-child {
 }
 
 .home-hero::before {
-  background: linear-gradient(90deg, var(--home-card) 0%, rgba(255, 255, 255, 0.9) 44%, rgba(255, 255, 255, 0.2) 100%);
+  background: linear-gradient(90deg, var(--home-hero-overlay-start) 0%, var(--home-hero-overlay-middle) 44%, var(--home-hero-overlay-end) 100%);
   content: "";
   inset: 0;
   position: absolute;
@@ -251,7 +283,7 @@ body:has(.home-page) .md-content__inner > h1:first-child {
 
 .home-entry-card:hover,
 .home-product-card:hover {
-  border-color: rgba(33, 150, 243, 0.45);
+  border-color: var(--home-hover-border);
   box-shadow: var(--home-shadow-hover);
 }
 
@@ -372,7 +404,7 @@ body:has(.home-page) .md-content__inner > h1:first-child {
 
 .home-partner-logo {
   align-items: center;
-  background: var(--home-card-soft);
+  background: var(--home-partner-card);
   border: 1px solid var(--home-border);
   border-radius: var(--home-radius);
   display: flex;
@@ -384,8 +416,8 @@ body:has(.home-page) .md-content__inner > h1:first-child {
 }
 
 .home-partner-logo:hover {
-  background: var(--home-primary-soft);
-  border-color: rgba(33, 150, 243, 0.45);
+  background: var(--home-partner-card-hover);
+  border-color: var(--home-hover-border);
   box-shadow: var(--home-shadow-hover);
 }
 
@@ -487,7 +519,7 @@ body:has(.home-page) .md-content__inner > h1:first-child {
   }
 
   .home-hero::before {
-    background: linear-gradient(90deg, var(--home-card) 0%, rgba(255, 255, 255, 0.92) 72%, rgba(255, 255, 255, 0.4) 100%);
+    background: linear-gradient(90deg, var(--home-hero-overlay-start) 0%, var(--home-hero-overlay-mobile-middle) 72%, var(--home-hero-overlay-mobile-end) 100%);
   }
 
   .home-hero__title {
@@ -514,10 +546,11 @@ body:has(.home-page) .md-content__inner > h1:first-child {
     <img class="home-hero__image" src="image/qemu-camp-hero-bg.png" alt="QEMU 训练营科技渐变背景" />
     <div class="home-hero__content">
       <span class="home-eyebrow">QEMU Training Camp</span>
-      <p class="home-hero__title">QEMU 训练营</p>
+      <p class="home-hero__title">QEMU 训练营 2026</p>
       <p class="home-hero__desc">以模拟器/虚拟化技术为底座的 CPU/GPGPU 体系结构相关的开放学习与实践平台，全程免费，资料开源，社区共建。</p>
       <div class="home-hero__actions">
         <a class="home-button home-button--primary" href="tutorial/2026/">开始学习</a>
+        <a class="home-button" href="enroll/">GitHub 报名</a>
         <a class="home-button" href="exercise/2026/">查看实验</a>
       </div>
     </div>
@@ -550,13 +583,13 @@ body:has(.home-page) .md-content__inner > h1:first-child {
     <div class="home-entry-grid">
       <a class="home-entry-card home-entry-card--wide" href="tutorial/2026/">
         <span class="home-entry-card__kicker">Tutorial</span>
-        <span class="home-entry-card__title">QEMU 训练营 2026 讲义</span>
-        <span class="home-entry-card__desc">从开发环境、QOM、MemoryRegion 到 TCG、CPU 建模、PCIe、Rust 建模和项目实践。</span>
+        <span class="home-entry-card__title">在线讲义</span>
+        <span class="home-entry-card__desc">从开发环境、QOM、MemoryRegion 到 TCG、CPU 建模、PCIe、Rust 建模和项目方向学习资料。</span>
       </a>
       <a class="home-entry-card" href="exercise/2026/">
         <span class="home-entry-card__kicker">Exercise</span>
-        <span class="home-entry-card__title">实验手册</span>
-        <span class="home-entry-card__desc">覆盖 C、Rust、CPU、SoC、GPU 等方向的阶段实验。</span>
+        <span class="home-entry-card__title">实验内容</span>
+        <span class="home-entry-card__desc">覆盖 C、Rust、CPU、SoC、GPU 实验和四个项目方向。</span>
       </a>
       <a class="home-entry-card" href="blogs/">
         <span class="home-entry-card__kicker">Blog</span>
@@ -569,25 +602,25 @@ body:has(.home-page) .md-content__inner > h1:first-child {
   <section class="home-section">
     <div class="home-section__head">
       <h2>项目预览</h2>
-      <a href="tutorial/2026/ch3/">全部项目</a>
+      <a href="exercise/2026/stage3/">全部项目</a>
     </div>
     <div class="home-product-grid">
-      <a class="home-product-card" href="tutorial/2026/ch3/qemu-k230/">
+      <a class="home-product-card" href="exercise/2026/stage3/qemu-k230/">
         <img src="image/home-direction-soc.jpg" alt="K230 星务计算单元 QEMU 建模示意" />
         <span>K230 星务计算单元建模</span>
         <p>基于 QEMU 上游 K230 machine，推进 RustSBI 适配、外设补全和安全实验支撑。</p>
       </a>
-      <a class="home-product-card" href="tutorial/2026/ch3/qemu-cxlemu/">
+      <a class="home-product-card" href="exercise/2026/stage3/qemu-cxlemu/">
         <img src="image/home-direction-gpgpu.jpg" alt="CXLMemSim 与 QEMU 推理后端优化示意" />
         <span>CXLMemSim 推理后端优化</span>
         <p>在 QEMU + CXLMemSim 的 CXL Type-2 仿真环境中优化 Kimi K2.6 供数路径。</p>
       </a>
-      <a class="home-product-card" href="tutorial/2026/ch3/qemu-agent/">
+      <a class="home-product-card" href="exercise/2026/stage3/qemu-agent/">
         <img src="image/home-direction-cpu.jpg" alt="大模型 Agent 自动化外设建模示意" />
         <span>Agent 自动化外设建模</span>
         <p>围绕 STM32 等 MCU 外设，探索参考手册、驱动代码到 QEMU 模型的自动化生成。</p>
       </a>
-      <a class="home-product-card" href="tutorial/2026/ch3/qemu-wine-ce/">
+      <a class="home-product-card" href="exercise/2026/stage3/qemu-wine-ce/">
         <img src="image/home-direction-rust.jpg" alt="Wine-CE RISC-V 适配 x86 应用示意" />
         <span>Wine-CE 跨架构应用兼容</span>
         <p>基于 Wine、Box64 与 QEMU user 协作，在 RISC-V 等平台适配 x86 应用和游戏。</p>

@@ -366,4 +366,4 @@ QEMU 默认的 TCG 后端是单线程模式（`thread=single`），对于 G233 �
 [2]: https://github.com/riscv-collab/riscv-gnu-toolchain/releases/
 [3]: https://classroom.github.com/a/hwWFrmo_
 [4]: ../../../../leaderboards/2026/professional/cpu.md
-[5]: https://qemu.gevico.online/exercise/2026/stage1/cpu/cpu-datasheet/
+[5]: https://qemu.gevico.online/exercise/2026/stage2/cpu/cpu-datasheet/

@@ -1,0 +1,193 @@
+.qemu-enrollment {
+  --enrollment-accent: #1f6f54;
+  --enrollment-accent-hover: #185842;
+  --enrollment-border: var(--md-default-fg-color--lightest, #dfe5e2);
+  --enrollment-panel: var(--md-default-bg-color, #ffffff);
+  --enrollment-muted: var(--md-default-fg-color--light, #5f6b66);
+  align-items: center;
+  background: var(--enrollment-panel);
+  border: 1px solid var(--enrollment-border);
+  border-left: 0.24rem solid var(--enrollment-accent);
+  border-radius: 0.35rem;
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin: 1.2rem 0;
+  padding: 1.2rem 1.3rem;
+}
+
+.qemu-enrollment__content {
+  min-width: 0;
+}
+
+.qemu-enrollment__eyebrow {
+  color: var(--enrollment-accent);
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+}
+
+.qemu-enrollment__title {
+  font-size: 1.1rem !important;
+  margin: 0 !important;
+}
+
+.qemu-enrollment__description {
+  color: var(--enrollment-muted);
+  font-size: 0.86rem;
+  line-height: 1.65;
+  margin: 0.45rem 0 0 !important;
+  max-width: 38rem;
+}
+
+.qemu-enrollment__actions {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 9.5rem;
+}
+
+.qemu-enrollment__button {
+  align-items: center;
+  background: var(--enrollment-accent);
+  border: 1px solid var(--enrollment-accent);
+  border-radius: 0.3rem;
+  color: #ffffff !important;
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 2.45rem;
+  padding: 0.55rem 1rem;
+  text-decoration: none !important;
+  transition: background 150ms ease, border-color 150ms ease;
+  width: 100%;
+}
+
+.qemu-enrollment__button:hover,
+.qemu-enrollment__button:focus-visible {
+  background: var(--enrollment-accent-hover);
+  border-color: var(--enrollment-accent-hover);
+}
+
+.qemu-enrollment__button:focus-visible {
+  outline: 2px solid var(--enrollment-accent);
+  outline-offset: 0.15rem;
+}
+
+.qemu-enrollment__button[aria-disabled="true"] {
+  background: transparent;
+  border-color: var(--enrollment-border);
+  color: var(--enrollment-muted) !important;
+  pointer-events: none;
+}
+
+.qemu-enrollment__status {
+  color: var(--enrollment-muted);
+  font-size: 0.72rem;
+  min-height: 1.1rem;
+}
+
+.qemu-enrollment__status[data-state="success"] {
+  color: var(--enrollment-accent);
+  font-weight: 700;
+}
+
+.qemu-enrollment__lookup {
+  border-top: 1px solid var(--enrollment-border);
+  display: grid;
+  gap: 0.45rem;
+  grid-column: 1 / -1;
+  padding-top: 1rem;
+}
+
+.qemu-enrollment__lookup-label {
+  color: var(--md-default-fg-color);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.qemu-enrollment__lookup-controls {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: minmax(0, 1fr) 5rem;
+  max-width: 30rem;
+}
+
+.qemu-enrollment__input,
+.qemu-enrollment__lookup-button {
+  border-radius: 0.3rem;
+  font: inherit;
+  min-height: 2.35rem;
+}
+
+.qemu-enrollment__input {
+  background: var(--md-default-bg-color, #ffffff);
+  border: 1px solid var(--enrollment-border);
+  color: var(--md-default-fg-color);
+  font-size: 0.8rem;
+  min-width: 0;
+  padding: 0.45rem 0.7rem;
+}
+
+.qemu-enrollment__input:focus {
+  border-color: var(--enrollment-accent);
+  outline: 2px solid color-mix(in srgb, var(--enrollment-accent) 22%, transparent);
+  outline-offset: 0;
+}
+
+.qemu-enrollment__lookup-button {
+  background: transparent;
+  border: 1px solid var(--enrollment-accent);
+  color: var(--enrollment-accent);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.45rem 0.8rem;
+}
+
+.qemu-enrollment__lookup-button:hover,
+.qemu-enrollment__lookup-button:focus-visible {
+  background: var(--enrollment-accent);
+  color: #ffffff;
+}
+
+.qemu-enrollment__lookup-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.qemu-enrollment__lookup-result {
+  color: var(--enrollment-muted);
+  font-size: 0.75rem;
+  min-height: 1.15rem;
+}
+
+.qemu-enrollment__lookup-result[data-state="success"] {
+  color: var(--enrollment-accent);
+  font-weight: 700;
+}
+
+.qemu-enrollment__lookup-result[data-state="error"] {
+  color: #b42318;
+}
+
+@media (max-width: 44rem) {
+  .qemu-enrollment {
+    grid-template-columns: 1fr;
+  }
+
+  .qemu-enrollment__actions {
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .qemu-enrollment__lookup-controls {
+    grid-template-columns: minmax(0, 1fr) 4.5rem;
+    max-width: none;
+  }
+}

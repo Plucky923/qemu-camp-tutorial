@@ -82,11 +82,13 @@ theme:
     - header.autohide
 extra_css:
   - plugins/stylesheets/extra.css
+  - plugins/stylesheets/enrollment.css
   - plugins/stylesheets/registration-stats.css
   - plugins/stylesheets/leaderboards.css
   - plugins/stylesheets/ppt-slides.css
 extra_javascript:
   - plugins/javascripts/toc-collapse.js
+  - plugins/javascripts/enrollment.js
   - plugins/javascripts/registration-stats.js
   - plugins/javascripts/ppt-slides.js
   - plugins/javascripts/mathjax-config.js
@@ -94,6 +96,7 @@ extra_javascript:
 
 nav:
   - 主页: index.md
+  - GitHub 报名: enroll.md
   - 讲义:
     - QEMU 训练营 2026:
       - 训练营介绍: tutorial/2026/index.md
@@ -134,7 +137,6 @@ nav:
         - b. 建模 AI 加速卡: tutorial/2026/ch3/qemu-cxlemu.md
         - c. 大模型建模外设: tutorial/2026/ch3/qemu-agent.md
         - d. 应用跨平台转译: tutorial/2026/ch3/qemu-wine-ce.md
-        - e. AI 开发提示: tutorial/2026/ch3/qemu-ai-dev-guidance.md
     - QEMU 训练营 2025:
       - 训练营介绍: tutorial/2025/index.md
       - 1. 导学阶段: tutorial/2025/ch0/index.md
@@ -189,27 +191,33 @@ nav:
     - QEMU 训练营 2026:
       - 训练营介绍: exercise/2026/index.md
       - 基础阶段:
-        - 实验介绍: exercise/2026/stage0/index.md
-        - C 实验: exercise/2026/stage0/learning-c.md
-        - Rust 实验: exercise/2026/stage0/learning-rust.md
-      - 专业阶段:
         - 实验介绍: exercise/2026/stage1/index.md
+        - C 实验: exercise/2026/stage1/learning-c.md
+        - Rust 实验: exercise/2026/stage1/learning-rust.md
+      - 专业阶段:
+        - 实验介绍: exercise/2026/stage2/index.md
         - CPU 实验:
-          - 实验介绍: exercise/2026/stage1/cpu/index.md
-          - CPU 实验手册: exercise/2026/stage1/cpu/cpu-exper-manual.md
-          - CPU 硬件手册: exercise/2026/stage1/cpu/cpu-datasheet.md
+          - 实验介绍: exercise/2026/stage2/cpu/index.md
+          - CPU 实验手册: exercise/2026/stage2/cpu/cpu-exper-manual.md
+          - CPU 硬件手册: exercise/2026/stage2/cpu/cpu-datasheet.md
         - SoC 实验:
-          - 实验介绍: exercise/2026/stage1/soc/index.md
-          - SoC 实验手册: exercise/2026/stage1/soc/g233-exper-manual.md
-          - SoC 硬件手册: exercise/2026/stage1/soc/g233-datasheet.md
+          - 实验介绍: exercise/2026/stage2/soc/index.md
+          - SoC 实验手册: exercise/2026/stage2/soc/g233-exper-manual.md
+          - SoC 硬件手册: exercise/2026/stage2/soc/g233-datasheet.md
         - GPU 实验:
-          - 实验介绍: exercise/2026/stage1/gpu/index.md
-          - GPGPU 实验手册: exercise/2026/stage1/gpu/gpu-exper-manual.md
-          - GPGPU 硬件手册: exercise/2026/stage1/gpu/gpu-datasheet.md
+          - 实验介绍: exercise/2026/stage2/gpu/index.md
+          - GPGPU 实验手册: exercise/2026/stage2/gpu/gpu-exper-manual.md
+          - GPGPU 硬件手册: exercise/2026/stage2/gpu/gpu-datasheet.md
         - Rust 实验:
-          - 实验介绍: exercise/2026/stage1/rust/index.md
-          - Rust 实验手册: exercise/2026/stage1/rust/rust-exper-manual.md
-          - Rust 编程指南: exercise/2026/stage1/rust/rust-lang-manual.md
+          - 实验介绍: exercise/2026/stage2/rust/index.md
+          - Rust 实验手册: exercise/2026/stage2/rust/rust-exper-manual.md
+          - Rust 编程指南: exercise/2026/stage2/rust/rust-lang-manual.md
+      - 项目阶段:
+        - 项目介绍: exercise/2026/stage3/index.md
+        - 数字星务计算机: exercise/2026/stage3/qemu-k230.md
+        - 建模 AI 加速卡: exercise/2026/stage3/qemu-cxlemu.md
+        - 大模型建模外设: exercise/2026/stage3/qemu-agent.md
+        - 应用跨平台转译: exercise/2026/stage3/qemu-wine-ce.md
   - 排行榜:
     - QEMU 训练营 2026:
       - 基础阶段:
@@ -271,6 +279,7 @@ nav:
         - silicalet: blogs/2026/professional/qemu-camp-2026-silicalet.md
         - 2359912755: blogs/2026/professional/qemu-camp-2026-2359912755.md
         - Old-cpu: blogs/2026/professional/qemu-camp-2026-Old-cpu.md
+        - GrexLoong: blogs/2026/professional/qemu-camp-2026-GrexLoong.md
       - 项目阶段:
         - 暂无文章: blogs/2026/project/project-stage.md
     - 训练营 2025:

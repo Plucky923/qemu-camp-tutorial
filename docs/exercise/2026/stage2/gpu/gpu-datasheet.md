@@ -184,6 +184,7 @@ GPGPU 是为 QEMU 训练营定制的虚拟 PCIe 3D 加速器设备。其设计�
 ### 6.5 软复位行为
 
 写 `GLOBAL_CTRL.RESET = 1` 后：
+
 - `global_ctrl` 清零
 - `global_status` 恢复 `READY`
 - 所有错误/中断状态清零

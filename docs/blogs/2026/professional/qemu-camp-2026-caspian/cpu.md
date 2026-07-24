@@ -238,7 +238,7 @@ object_property_add(obj, "xtheadba", "bool",
 
 #### Step 2–5: trans 函数和 Helper
 
-通过观察[硬件手册](https://qemu.gevico.online/exercise/2026/stage1/cpu/cpu-datasheet/)，指令实现涉及三种数据元素的操作：
+通过观察[硬件手册](https://qemu.gevico.online/exercise/2026/stage2/cpu/cpu-datasheet/)，指令实现涉及三种数据元素的操作：
 
 1. **获取寄存器的值**：`gen_helper_*` 中通过 `env->gpr[rs1]` 直接访问 RISC-V 通用寄存器
 2. **读取 guest 地址的数据**：`cpu_ld{size}_mmuidx_ra(env, addr, mem_idx, ra)`，其中 size 为 b(8 位)/w(16 位)/l(32 位)/q(64 位)

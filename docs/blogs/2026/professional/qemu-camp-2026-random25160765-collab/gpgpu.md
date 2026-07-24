@@ -262,8 +262,8 @@ export QTEST_QEMU_OPTIONS="-S"
 
 ## 参考资料
 
-- *GPGPU 虚拟加速器实验手册*，QEMU Camp 2026. [在线链接](https://qemu.gevico.online/exercise/2026/stage1/gpu/gpu-exper-manual/)  
-- *GPGPU 虚拟加速器硬件手册（教学版）*，QEMU Camp 2026. [在线链接](https://qemu.gevico.online/exercise/2026/stage1/gpu/gpu-datasheet/)
+- *GPGPU 虚拟加速器实验手册*，QEMU Camp 2026. [在线链接](https://qemu.gevico.online/exercise/2026/stage2/gpu/gpu-exper-manual/)
+- *GPGPU 虚拟加速器硬件手册（教学版）*，QEMU Camp 2026. [在线链接](https://qemu.gevico.online/exercise/2026/stage2/gpu/gpu-datasheet/)
 - *NEMU (NJU Emulator) 官方文档*，南京大学计算机系统基础实验 (PA). [在线链接](https://ysyx.oscc.cc/docs/ics-pa/)  
 - *QEMU Developer Information: QOM (QEMU Object Model)*. [在线链接](https://www.qemu.org/docs/master/devel/)
 - *The RISC-V Instruction Set Manual, Volume I: Unprivileged ISA*. [在线链接](https://riscv.org/technical/specifications/)

@@ -6,6 +6,8 @@
 
 [☞ 线上报名通道 ☄](https://opencamp.cn/gevico/camp/2026/register?code=d6EdXAxro0eFJ)
 
+[使用 GitHub 账号报名实验](../../enroll.md)
+
 <div class="qemu-registration-stats" data-registration-src="../../data/qemu-registration-2026.json" data-registration-title="QEMU 训练营 2026 报名数据统计">报名数据加载中...</div>
 
 [gevico-link]: https://github.com/gevico
