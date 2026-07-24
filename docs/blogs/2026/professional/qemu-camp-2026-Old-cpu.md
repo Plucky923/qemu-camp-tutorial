@@ -16,7 +16,7 @@
 
 ## 学习内容
 
-### 1\. 项目结构
+### 1. 项目结构
 
 ```Plaintext
 $ hw/gpgpu git:(main) ✗ tree
@@ -34,7 +34,7 @@ $ hw/gpgpu git:(main) ✗ tree
 
 `inst.h` 里我用的是 NEMU 风格的指令匹配宏，把机器码里的 opcode、rs、rt、rd 拆出来。
 
-项目仓库：[qemu\-camp\-GPGPU/hw/gpgpu at main · CoEvolutio/qemu\-camp\-GPGPU](https://github.com/CoEvolutio/qemu-camp-GPGPU/tree/main/hw/gpgpu)
+项目仓库：[qemu-camp-GPGPU/hw/gpgpu at main · CoEvolutio/qemu-camp-GPGPU](https://github.com/CoEvolutio/qemu-camp-GPGPU/tree/main/hw/gpgpu)
 
 
 
@@ -61,7 +61,7 @@ qemu-camp-GPGPU                         evo-gpu
                       QEMU GPGPU 设备
 ```
 
-### 2\. QEMU GPGPU 设备模型
+### 2. QEMU GPGPU 设备模型
 
 QEMU GPGPU 建模可以从一次 kernel launch 展开。
 
@@ -69,7 +69,7 @@ guest CPU 先把程序和输入放进显存，再写一组控制寄存器，最�
 
 于是整个外设可以抓成三条线：`gpgpu_ctrl_read()` / `gpgpu_ctrl_write()` 处理控制，`gpgpu_vram_read()` / `gpgpu_vram_write()` 暴露显存，`gpgpu_core_exec_kernel()` 把配置变成计算。建模文档在 `docs/specs/gpgpu.rst`，它描述的是 guest 能够看见、能够驱动的一块设备。
 
-#### 2\.1 GPGPU 外设接入 QEMU
+#### 2.1 GPGPU 外设接入 QEMU
 
 设备接入由以下构建链完成：
 
@@ -79,13 +79,13 @@ hw/Kconfig -> hw/meson.build -> hw/gpgpu/Kconfig -> hw/gpgpu/meson.build
 
 `CONFIG_GPGPU` 打开后，QEMU 会把 `gpgpu.c`、`gpgpu_core.c`、`utils/utils.c` 编进来。此时命令行中的 `-device gpgpu` 才会生成这块 PCI 设备。
 
-#### 2\.2 SIMT 执行核心
+#### 2.2 SIMT 执行核心
 
 `gpgpu.c` 把它放进 PCIe 世界：BAR、MMIO、VRAM、复位和中断都在这里。读者沿着 `DISPATCH` 往下走，会来到 `gpgpu_core.c`。这里才是 GPU 的味道最浓的地方。
 
 项目用一个很朴素的方式模拟 SIMT：给每个线程留一份独立状态，再把 32 个线程放进一个 warp。`GPGPU_WARP_SIZE` 固定为 32，`GPGPUWarp` 里放着 32 个 `GPGPULane`。每个 lane 有自己的 `gpr`、`fpr`、`pc` 和 `mhartid`，因此同一个 kernel 被不同线程执行时，线程之间不会共用寄存器和程序计数器。
 
-一次 dispatch 进入 `gpgpu_core_exec_kernel()` 后，执行器先根据 `grid_dim` 遍历 block，再根据 `block_dim` 每次取 32 个线程组成 warp。`gpgpu_core_init_warp()` 为这批 lane 设置相同的 kernel 起点，并用 `MHARTID_ENCODE()` 把 block、warp、lane 编进线程 ID。随后 `gpgpu_core_exec_warp()` 计算每个线程的 `thread_id`，填入 block、warp、lane 上下文，最后交给 `gpgpu_core_exec_lane()` 逐条解释 RISC\-V 指令。
+一次 dispatch 进入 `gpgpu_core_exec_kernel()` 后，执行器先根据 `grid_dim` 遍历 block，再根据 `block_dim` 每次取 32 个线程组成 warp。`gpgpu_core_init_warp()` 为这批 lane 设置相同的 kernel 起点，并用 `MHARTID_ENCODE()` 把 block、warp、lane 编进线程 ID。随后 `gpgpu_core_exec_warp()` 计算每个线程的 `thread_id`，填入 block、warp、lane 上下文，最后交给 `gpgpu_core_exec_lane()` 逐条解释 RISC-V 指令。
 
 因此，这里的 SIMT 需要分成两个层面理解。线程组织方式遵循 GPU：一个 block 被切成多个 warp，每个 lane 通过线程坐标和 `mhartid` 找到自己的数据。执行方式则是解释器在宿主机上逐 lane 推进，并没有模拟真实 GPU 的并行发射和流水线。对于向量加法这样的 kernel，这已经足够产生正确的线程语义，也能让我们看清 grid、block、warp 和 lane 如何互相传递信息。
 
@@ -115,7 +115,7 @@ gpgpu_core_exec_kernel()
                     逐条解释 RISC-V 指令
 ```
 
-#### 2\.3 低精度浮点扩展
+#### 2.3 低精度浮点扩展
 
 低精度部分要看 `utils.c` 里的指令解释。`gpgpu_decode_exec()` 通过 `INSTPAT` 匹配自定义指令，再调用格式转换函数：
 
@@ -153,7 +153,7 @@ lane.fpr: FP32 bit pattern
              仍走 FP32 运算
 ```
 
-#### 2\.4 CPU 与 GPGPU 的数据交互
+#### 2.4 CPU 与 GPGPU 的数据交互
 
 把视角切回 CPU，会发现控制和数据走了两条不同的路。BAR0 是控制通道，BAR2 是数据通道。
 
@@ -163,7 +163,7 @@ lane.fpr: FP32 bit pattern
 
 EvoGPU 的当前实现没有让用户态直接碰 BAR0。`evo_gpu_mmap()` 通过 `io_remap_pfn_range()` 把 BAR2 映射到 runtime，runtime 里的 `evoMemcpyHostToDevice()` 和 `evoMemcpyDeviceToHost()` 最终就是对这块映射区做 `memcpy`。设备模型中虽然有 DMA 寄存器和完成定时器，现有 miniCUDA 主路径还没有使用它们搬运数据。
 
-#### 2\.5 控制面与数据面
+#### 2.5 控制面与数据面
 
 ```Plaintext
 +----------------------+
@@ -191,11 +191,11 @@ EvoGPU 的当前实现没有让用户态直接碰 BAR0。`evo_gpu_mmap()` 通过
 
 读到这里，外设的轮廓就出来了：MMIO 负责把 CPU 的意图交给设备，VRAM 承接程序和数据，SIMT 核心负责兑现那次 launch。
 
-### 3\. EvoGPU 软件栈
+### 3. EvoGPU 软件栈
 
 到这里还只有一块能被写寄存器的卡。`evo-gpu` 接下来的工作，是把它变成普通 C 程序也能使用的计算设备。驱动贴着 PCI 设备走，runtime 只留下分配、拷贝和提交三组 API；它们合在一起，就是一套 miniCUDA 软件栈。
 
-#### 3\.1 用户态与内核态 ABI
+#### 3.1 用户态与内核态 ABI
 
 ```Plaintext
 include/evo_gpu_uapi.h
@@ -213,7 +213,7 @@ EVO_GPU_IOCTL_LAUNCH
 
 这两个 ioctl 给内核态和用户态定下了接口：一个用来问设备有什么能力，一个携带 kernel 地址和启动参数。后面无论是 runtime 还是 sample，都只需要沿着这个边界说话。
 
-#### 3\.2 Linux PCI 驱动
+#### 3.2 Linux PCI 驱动
 
 `evo_gpu_probe()` 找到 QEMU 暴露的 PCI 设备，申请 PCI BAR，并用 `pci_iomap()` 得到 BAR0 的内核地址；BAR2 的物理地址和长度则记录下来，交给后面的 mmap 路径。驱动随后创建 `/dev/evo0`，runtime 所有操作都从这个文件描述符进入。
 
@@ -225,7 +225,7 @@ EVO_GPU_IOCTL_LAUNCH
 
 当前模型的执行还是同步的：QEMU 在处理 `DISPATCH` 这次 MMIO 写入时直接跑完整个 kernel，执行结束后才返回驱动。因此 EvoGPU 里暂时没有单独的等待 API，`evoLaunchKernel()` 返回时，结果已经写回 BAR2。这种实现很适合把调用链跑通，异步队列、中断通知和真正的并行调度还没有进入这条路径。
 
-#### 3\.3 Runtime API
+#### 3.3 Runtime API
 
 ```Plaintext
 evoOpen()
@@ -251,7 +251,7 @@ evoLaunchKernel()
 
 runtime 没有重新实现一套设备控制逻辑。它做的是把 C 调用变成两种底层动作：数据 API 操作 `dev->vram` 映射区，执行 API 提交 ioctl。真正的 MMIO 读写集中在驱动里，寄存器偏移也集中在 `evo_gpu_uapi.h`。
 
-#### 3\.4 完整执行流水线
+#### 3.4 完整执行流水线
 
 ```Plaintext
 sample
@@ -312,9 +312,9 @@ sample                 runtime                 driver                 QEMU / VRA
 
 这就是两个仓库接起来后的完整闭环：数据通过 BAR2 进入设备，控制通过 BAR0 发出，`gpgpu_core_exec_kernel()` 把一次 launch 展开成线程执行，结果再沿 BAR2 回到 CPU。文章真正需要抓住的主线，也就在这四个动作里：放数据、写控制、跑线程、取结果。
 
-#### 3\.5 项目结构
+#### 3.5 项目结构
 
-项目仓库：https://github\.com/CoEvolutio/evo\-gpu
+项目仓库：https://github.com/CoEvolutio/evo-gpu
 
 ```Plain Text
 $ evo-gpu git:(main) tree
