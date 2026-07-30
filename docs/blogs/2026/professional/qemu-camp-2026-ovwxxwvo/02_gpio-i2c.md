@@ -26,11 +26,11 @@
 │       ├── device.rs  
 │       └── lib.rs  
 ```  
+
 - 项目文件结构的设计是为了减少QEMU的C代码对RUST代码的多次调用。  
 - 主控设备实现的crate(gpio_i2c)是唯一提供给QEMU调用的接口，每个主控都是独立的crate。  
 - 主控总线和从机特性的实现的crate(i2c_core)仅在RUST内部供主控和从机的实现使用。  
 - 从机外设的实现将在crate(i2c_slave)以mod形式存在，每个从机外设都为独立的mod。  
-
 
 #### 项目混合编程对接文件  
 ```  
@@ -43,6 +43,7 @@
 ./include/hw/riscv/g233.h               // 声明项目相关内存映射枚举  
 ./hw/riscv/g233.c                       // 调用控制器create实现  
 ```  
+
 - `gpio_i2c_create`和`gpio-i2c`这两个符号在C和RUST中是对应的。  
 - 主要涉及文件`./include/hw/i2c/gpio_i2c.h`和`./rust/hw/i2c/gpio_i2c/src/lib.rs`。  
 
@@ -57,8 +58,9 @@
 ./rust/hw/i2c/meson.build           // 添加子项  
 
 ./rust/hw/i2c/gpio_i2c/meson.build  // 注意添加bindgen相关  
-./rust/hw/i2c/gpio_i2c/Cargo.toml   // 注意信赖相对路径层级  
+./rust/hw/i2c/gpio_i2c/Cargo.toml   // 注意依赖相对路径层级  
 ```  
+
 - `./rust/Cargo.toml`顶层`workspace`添加相应的`crate`，  
   这样lsp才能生效，必要时`cargo clean`。  
 
@@ -90,7 +92,7 @@ impl GPIOI2CState {}                           // 实现数据收发工具函数
 // 导出设备创建函数  
 pub unsafe extern "C" fn gpio_i2c_create()     // 创建实例化设备，供QEMU的C代码调用  
 ```  
-- GPIO_I2C主控设备为极简实现未涉及中断内容。  
+- GPIO_I2C主控设备为极简实现，未实现中断逻辑。  
 
 #### GPIO_I2C主控的业务函数调用链条  
 ```  
@@ -226,6 +228,6 @@ impl GPIOI2CRegisters {
 #### 总结  
 - RUST和C的多语言混合编程，工程搭建繁琐，占据大半时间。  
 - 了解QEMU设备的实现框架，理清函数调用链路，  
-  关键就是实现主控寄存器基于协议的读写逻辑。  
+  关键业务代码是实现主控寄存器基于协议的读写逻辑。  
 - 项目未用到GDB调试，有待进一步学习，不懂知识由豆包协助推进。  
 
