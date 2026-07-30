@@ -58,28 +58,28 @@
 #### GPIO_I2C主控的极简实现框架(仿pl011，未涉及中断)  
 ```  
 // QEMU硬件抽象层  
-pub struct GPIOI2CRegisters {  // 寄存器，存放设备所有寄存器  
-pub struct GPIOI2CState {      // QOM设备模型，存放设备运行状态  
-pub struct GPIOI2CClass {      // QOM设备类，存放设备固定属性  
+pub struct GPIOI2CRegisters {}  // 寄存器，存放设备所有寄存器  
+pub struct GPIOI2CState {}      // QOM设备模型，存放设备运行状态  
+pub struct GPIOI2CClass {}      // QOM设备类，存放设备固定属性  
 
 // 业务特性，强制设备挂载系统总线并规定设备唯一ID  
-trait GPIOI2CImpl: SysBusDeviceImpl + IsA<GPIOI2CState> {  
+trait GPIOI2CImpl: SysBusDeviceImpl + IsA<GPIOI2CState> {}  
 
 // QEMU框架适配层  
-impl GPIOI2CClass {                           // 保存设备ID，调用父类初始化  
-unsafe impl ObjectType for GPIOI2CState {     // 绑定实例类对象，设备命名供QEMU使用  
-impl GPIOI2CImpl for GPIOI2CState {           // 定义设备ID  
-impl ObjectImpl for GPIOI2CState {            // 绑定设备完整生命周期函数  
-impl DeviceImpl for GPIOI2CState {            // 启用设备，创建设备硬件资源  
-impl ResettablePhasesImpl for GPIOI2CState {  // 复位回调，虚拟机复位时恢复硬件初始状态  
-impl SysBusDeviceImpl for GPIOI2CState {      // 挂载设备到系统总线，绑定MMIO访问入口  
+impl GPIOI2CClass {}                           // 保存设备ID，调用父类初始化  
+unsafe impl ObjectType for GPIOI2CState {}     // 绑定实例类对象，设备命名供QEMU使用  
+impl GPIOI2CImpl for GPIOI2CState {}           // 定义设备ID  
+impl ObjectImpl for GPIOI2CState {}            // 绑定设备完整生命周期函数  
+impl DeviceImpl for GPIOI2CState {}            // 启用设备，创建设备硬件资源  
+impl ResettablePhasesImpl for GPIOI2CState {}  // 复位回调，虚拟机复位时恢复硬件初始状态  
+impl SysBusDeviceImpl for GPIOI2CState {}      // 挂载设备到系统总线，绑定MMIO访问入口  
 
 // QEMU业务接口层  
-impl GPIOI2CRegisters {                       // 实现寄存器读写及复位逻辑  
-impl GPIOI2CState {                           // 实现数据收发工具函数  
+impl GPIOI2CRegisters {}                       // 实现寄存器读写及复位逻辑  
+impl GPIOI2CState {}                           // 实现数据收发工具函数  
 
 // 导出设备创建函数  
-pub unsafe extern "C" fn gpio_i2c_create(     // 创建实例化设备，供QEMU的C代码调用  
+pub unsafe extern "C" fn gpio_i2c_create()     // 创建实例化设备，供QEMU的C代码调用  
 ```  
 
 #### GPIO_I2C主控的业务函数调用链条  
