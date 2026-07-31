@@ -8,7 +8,7 @@
 
 ---  
 
-#### 📁 项目主要目录结构  
+### 📁 项目主要目录结构  
 ```  
 ./rust/hw/i2c/  
 ├── i2c_core             // i2c通用核心实现  
@@ -32,22 +32,7 @@
 - 主控总线和从机特性的实现的crate(i2c_core)仅在RUST内部供主控和从机的实现使用。  
 - 从机外设的实现将在crate(i2c_slave)以mod形式存在，每个从机外设都为独立的mod。  
 
-#### 🛠️ 项目混合编程对接文件  
-```  
-./rust/hw/i2c/gpio_i2c/wrapper.h        // 专供bindgen解析的适配头，修复工具解析报错并引入标准C头文件  
-./rust/hw/i2c/gpio_i2c/src/bindings.rs  // 导入bindgen生成的QEMU的C接口绑定代码，Rust通过其调用C侧接口  
-
-./include/hw/i2c/gpio_i2c.h             // 声明C接口函数符号，供C代码调用Rust实现  
-./rust/hw/i2c/gpio_i2c/src/lib.rs       // 导出Rust功能实现，对接C声明接口函数符号  
-
-./include/hw/riscv/g233.h               // 声明项目相关内存映射枚举  
-./hw/riscv/g233.c                       // 调用控制器create实现  
-```  
-
-- `gpio_i2c_create`和`gpio-i2c`这两个符号在C和RUST中是对应的。  
-- 主要涉及文件`./include/hw/i2c/gpio_i2c.h`和`./rust/hw/i2c/gpio_i2c/src/lib.rs`。  
-
-#### 🛠️ 项目构建所需修改文件  
+### 🛠️ 项目构建所需修改文件  
 ```  
 ./hw/i2c/Kconfig                    // I2C驱动配置，新增GPIO_I2C编译项，关联Rust实现驱动  
 ./hw/riscv/Kconfig                  // RISC-V主板配置，GEVICO_G233平台新增GPIO_I2C外设依赖  
@@ -66,9 +51,24 @@
 - `./rust/hw/i2c/gpio_i2c/meson.build`文件中`_gpio_i2c_rs`需要添加  
   `{'.': _gpio_i2c_bindings_inc_rs},` 。  
 
+### 🛠️ 项目混合编程对接文件  
+```  
+./rust/hw/i2c/gpio_i2c/wrapper.h        // 专供bindgen解析的适配头，修复工具解析报错并引入标准C头文件  
+./rust/hw/i2c/gpio_i2c/src/bindings.rs  // 导入bindgen生成的QEMU的C接口绑定代码，Rust通过其调用C侧接口  
+
+./include/hw/i2c/gpio_i2c.h             // 声明C接口函数符号，供C代码调用Rust实现  
+./rust/hw/i2c/gpio_i2c/src/lib.rs       // 导出Rust功能实现，对接C声明接口函数符号  
+
+./include/hw/riscv/g233.h               // 声明项目相关内存映射枚举  
+./hw/riscv/g233.c                       // 调用控制器create实现  
+```  
+
+- `gpio_i2c_create`和`gpio-i2c`这两个符号在C和RUST中是对应的。  
+- 主要涉及文件`./include/hw/i2c/gpio_i2c.h`和`./rust/hw/i2c/gpio_i2c/src/lib.rs`。  
+
 ---  
 
-#### 🧩 GPIO_I2C主控的极简实现框架(仿pl011)  
+### 🧩 GPIO_I2C主控的极简实现框架  
 ```  
 // QEMU硬件抽象层  
 pub struct GPIOI2CRegisters {}  // 寄存器，存放设备所有寄存器  
@@ -95,12 +95,12 @@ impl GPIOI2CState {}                           // 实现数据收发工具函数
 pub unsafe extern "C" fn gpio_i2c_create()     // 创建实例化设备，供QEMU的C代码调用  
 ```  
 
-- GPIO_I2C主控设备为极简实现，未实现中断逻辑和复位逻辑。  
+- GPIO_I2C主控设备为极简实现，未实现中断逻辑和复位逻辑。(仿pl011)  
 - 寄存器的地址偏移和特定寄存器结构体在同crate的`registers.rs`中定义。  
 - I2C总线在`i2c_core`的crate中的`core.rs`中定义。  
 - I2C从机在`i2c_slave`的crate中进行不同外设的定义。  
 
-#### 🔗 GPIO_I2C主控的业务函数调用链条  
+### 🔗 GPIO_I2C主控的业务函数调用链条  
 ```  
 gpio_i2c_create  
   └> GPIOI2CState::new  
@@ -127,7 +127,7 @@ qtest_writel -> GPIOI2C_OPS.write -> GPIOI2CState::write -> GPIOI2CRegisters::wr
 
 ---  
 
-#### 🔄 I2C协议数据流转  
+### 🔄 I2C协议数据流转  
 ```  
              sys-bus                      i2c-bus  
  risc-v --<----------->-- i2c-master --<----------->-- i2c-slave  
@@ -145,7 +145,7 @@ I2C device                                                                    I2
 - 7位地址+1位读写标记，构成8位保存在地址寄存器，由主控发起。  
 - 8位数据，保存在数据寄存器。  
 
-#### 🧩 I2C_BUS的实现框架  
+### 🧩 I2C_BUS的实现框架  
 ```  
 pub struct I2CBus {  
     devices: Vec<Box<dyn I2CSlave>>,  // 挂载在总线上的从机列表  
@@ -169,7 +169,7 @@ impl I2CBus {
 ```  
 - I2C_Bus的实现是在RUST实验一核心代码上稍作修改完成。  
 
-#### 🧩 I2C_SLAVE的实现框架  
+### 🧩 I2C_SLAVE的实现框架  
 ```  
 pub struct AT24C02Slave {  
     pub addr: u8,          // 从机设备地址  
@@ -189,7 +189,7 @@ impl I2CSlave for AT24C02Slave {
 
 ---  
 
-#### 📦 GPIO_I2C主控的寄存器写根据I2C协议的实现  
+### 📦 GPIO_I2C主控的寄存器写根据I2C协议的实现  
 ```  
 impl GPIOI2CRegisters {  
 
@@ -254,12 +254,26 @@ impl GPIOI2CRegisters {
 
 }  
 ```  
+- I2C主从数据传输由写控制寄存器触发，需实现5个逻辑分支：  
+  - 使能+起始信号：发起传输，更新总线及寄存器状态  
+  - 使能+停止信号：结束传输，更新总线及寄存器状态  
+  - 使能+无起止+写模式：读寄存器发送数据，更新总线及寄存器状态  
+  - 使能+无起止+读模式：接收数据写寄存器，更新总线及寄存器状态  
+  - 无效控制组合，不执行任何操作  
 
 ---  
 
-#### 📝 总结  
-- RUST和C的多语言混合编程，工程搭建繁琐，占据大半时间。  
-- 了解QEMU设备的实现框架，理清函数调用链路，  
-  关键业务代码是实现主控寄存器基于协议的读写逻辑。  
-- 项目未用到GDB调试，有待进一步学习，不懂知识由豆包协助推进。  
+### 📝 总结  
+
+- RUST实现QEMU外设仿真(主控+从机)，可以参考[项目主要目录结构](#项目主要目录结构)进行设计。  
+- 项目构建和混合编程所涉及的文件可以根据自己项目名称对照两份清单进行修改，  
+  [项目构建所需修改文件](#项目构建所需修改文件)和[项目混合编程对接文件](#项目混合编程对接文件)。  
+- RUST实现QEMU设备对象主控等可以复刻[GPIO_I2C主控的极简实现框架](#gpio_i2c主控的极简实现框架)，替换设备名称。  
+- 总线和从机的框架也可参考[I2C_BUS的实现框架](#i2c_bus的实现框架)和[I2C_SLAVE的实现框架](#i2c_slave的实现框架)。  
+- 寄存器读写和主从设备之间通信需依据相应协议实现。  
+
+RUST和C的多语言混合编程，工程搭建繁琐，占据大半时间。  
+了解QEMU设备的实现框架，理清函数调用链路，  
+关键业务代码是实现主控寄存器基于协议的读写逻辑。  
+项目未用到GDB调试，有待进一步学习，不懂知识由豆包协助推进。  
 
