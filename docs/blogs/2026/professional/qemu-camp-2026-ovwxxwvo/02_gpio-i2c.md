@@ -63,8 +63,8 @@
 
 - `./rust/Cargo.toml`顶层`workspace`添加相应的`crate`，  
   这样lsp才能生效，必要时`cargo clean`。  
-- `./rust/hw/i2c/gpio_i2c/meson.build`文件中`_rust_spi_rs`需要添加  
-  `{'.': _rust_spi_bindings_inc_rs},` 。  
+- `./rust/hw/i2c/gpio_i2c/meson.build`文件中`_gpio_i2c_rs`需要添加  
+  `{'.': _gpio_i2c_bindings_inc_rs},` 。  
 
 ---  
 
