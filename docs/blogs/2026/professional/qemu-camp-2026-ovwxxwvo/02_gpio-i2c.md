@@ -8,7 +8,7 @@
 
 ---  
 
-#### 项目主要目录结构  
+#### 📁 项目主要目录结构  
 ```  
 ./rust/hw/i2c/  
 ├── i2c_core             // i2c通用核心实现  
@@ -32,7 +32,7 @@
 - 主控总线和从机特性的实现的crate(i2c_core)仅在RUST内部供主控和从机的实现使用。  
 - 从机外设的实现将在crate(i2c_slave)以mod形式存在，每个从机外设都为独立的mod。  
 
-#### 项目混合编程对接文件  
+#### 🛠️ 项目混合编程对接文件  
 ```  
 ./rust/hw/i2c/gpio_i2c/wrapper.h        // 专供bindgen解析的适配头，修复工具解析报错并引入标准C头文件  
 ./rust/hw/i2c/gpio_i2c/src/bindings.rs  // 导入bindgen生成的QEMU的C接口绑定代码，Rust通过其调用C侧接口  
@@ -47,7 +47,7 @@
 - `gpio_i2c_create`和`gpio-i2c`这两个符号在C和RUST中是对应的。  
 - 主要涉及文件`./include/hw/i2c/gpio_i2c.h`和`./rust/hw/i2c/gpio_i2c/src/lib.rs`。  
 
-#### 项目构建所需修改文件  
+#### 🛠️ 项目构建所需修改文件  
 ```  
 ./hw/i2c/Kconfig                    // I2C驱动配置，新增GPIO_I2C编译项，关联Rust实现驱动  
 ./hw/riscv/Kconfig                  // RISC-V主板配置，GEVICO_G233平台新增GPIO_I2C外设依赖  
@@ -63,10 +63,12 @@
 
 - `./rust/Cargo.toml`顶层`workspace`添加相应的`crate`，  
   这样lsp才能生效，必要时`cargo clean`。  
+- `./rust/hw/i2c/gpio_i2c/meson.build`文件中`_rust_spi_rs`需要添加  
+  `{'.': _rust_spi_bindings_inc_rs},` 。  
 
 ---  
 
-#### GPIO_I2C主控的极简实现框架(仿pl011)  
+#### 🧩 GPIO_I2C主控的极简实现框架(仿pl011)  
 ```  
 // QEMU硬件抽象层  
 pub struct GPIOI2CRegisters {}  // 寄存器，存放设备所有寄存器  
@@ -92,20 +94,45 @@ impl GPIOI2CState {}                           // 实现数据收发工具函数
 // 导出设备创建函数  
 pub unsafe extern "C" fn gpio_i2c_create()     // 创建实例化设备，供QEMU的C代码调用  
 ```  
-- GPIO_I2C主控设备为极简实现，未实现中断逻辑。  
 
-#### GPIO_I2C主控的业务函数调用链条  
+- GPIO_I2C主控设备为极简实现，未实现中断逻辑和复位逻辑。  
+- 寄存器的地址偏移和特定寄存器结构体在同crate的`registers.rs`中定义。  
+- I2C总线在`i2c_core`的crate中的`core.rs`中定义。  
+- I2C从机在`i2c_slave`的crate中进行不同外设的定义。  
+
+#### 🔗 GPIO_I2C主控的业务函数调用链条  
 ```  
-gpio_i2c_create -> GPIOI2CState::new -> ... -> GPIOI2CState::init -> I2C_Bus::new  
-    GPIOI2CState::realize    -> I2CBus::attach -> AT24C02Slave::new  
-    GPIOI2CState::reset_hold -> GPIOI2CRegisters::reset  
-    GPIOI2CState::read  -> GPIOI2CRegisters::read  -> I2C_Bus::transfer_read  -> AT24C02Slave::recv  
-    GPIOI2CState::write -> GPIOI2CRegisters::write -> I2C_Bus::transfer_write -> AT24C02Slave::send  
+gpio_i2c_create  
+  └> GPIOI2CState::new  
+  |    └> GPIOI2CState::init  
+  |         └> MemoryRegion::init_io - GPIOI2C_OPS  
+  |         └> GPIOI2CRegisters - Default::default()  
+  |         └> I2C_Bus::new  
+  └> GPIOI2CState::sysbus_realize  
+       └> GPIOI2CState::realize -> I2CBus::attach -> AT24C02Slave::new  
 ```  
+```  
+qtest_readl  -> GPIOI2C_OPS.read  -> GPIOI2CState::read  -> GPIOI2CRegisters::read  
+
+qtest_writel -> GPIOI2C_OPS.write -> GPIOI2CState::write -> GPIOI2CRegisters::write  
+  ┌-----------------------------------------------------------┘  
+  └> I2C_Bus::transfer_read  -> AT24C02Slave::recv  
+  └> I2C_Bus::transfer_write -> AT24C02Slave::send  
+```  
+
+- `GPIOI2CState::init`初始化由`GPIOI2CState::new`构造间接调用。  
+- `GPIOI2CState::realize`实体化由`GPIOI2CState::sysbus_realize`实现间接调用。  
+- `I2CBus`分别在`GPIOI2CState`的`init`和`realize`中进行创建和从机挂载。  
+- I2C主从数据传输仅由写控制寄存器触发，写入其余寄存器和读取所有寄存器不触发总线通信。  
 
 ---  
 
-#### I2C协议数据流转  
+#### 🔄 I2C协议数据流转  
+```  
+             sys-bus                      i2c-bus  
+ risc-v --<----------->-- i2c-master --<----------->-- i2c-slave  
+processor                 controller                   peripheral  
+```  
 ```  
    /-SDA-<->- start+7addr(tx)+n|ack(rx)+8data(tx)+n|ack(rx)+stop -<->-SDA-\  
 I2C device                                                            I2C controller  
@@ -113,7 +140,7 @@ I2C device                                                            I2C contro
 ```  
 - I2C协议，两线一时钟(SCL)一数据(SDA)，单线进行数据收发。  
 
-#### I2C_BUS的实现框架  
+#### 🧩 I2C_BUS的实现框架  
 ```  
 pub struct I2CBus {  
     devices: Vec<Box<dyn I2CSlave>>,  // 挂载在总线上的从机列表  
@@ -137,7 +164,7 @@ impl I2CBus {
 ```  
 - I2C_Bus的实现是在RUST实验一核心代码上稍作修改完成。  
 
-#### I2C_SLAVE的实现框架  
+#### 🧩 I2C_SLAVE的实现框架  
 ```  
 pub struct AT24C02Slave {  
     pub addr: u8,          // 从机设备地址  
@@ -157,7 +184,7 @@ impl I2CSlave for AT24C02Slave {
 
 ---  
 
-#### GPIO_I2C主控的寄存器写根据I2C协议的实现  
+#### 📦 GPIO_I2C主控的寄存器写根据I2C协议的实现  
 ```  
 impl GPIOI2CRegisters {  
 
@@ -225,7 +252,7 @@ impl GPIOI2CRegisters {
 
 ---  
 
-#### 总结  
+#### 📝 总结  
 - RUST和C的多语言混合编程，工程搭建繁琐，占据大半时间。  
 - 了解QEMU设备的实现框架，理清函数调用链路，  
   关键业务代码是实现主控寄存器基于协议的读写逻辑。  
