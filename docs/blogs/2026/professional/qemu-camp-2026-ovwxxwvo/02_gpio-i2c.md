@@ -134,11 +134,16 @@ qtest_writel -> GPIOI2C_OPS.write -> GPIOI2CState::write -> GPIOI2CRegisters::wr
 processor                 controller                   peripheral  
 ```  
 ```  
-   /-SDA-<->- start+7addr(tx)+n|ack(rx)+8data(tx)+n|ack(rx)+stop -<->-SDA-\  
-I2C device                                                            I2C controller  
-   \-SCL----- ------       ...12345678...123456789...      ----- -----SCL-/  
+   /-SDA-<->- start+[7addr+1rw](tx)+n|ack(rx)+[8data](tx)+n|ack(rx)+stop -<->-SDA-\  
+I2C device                                                                    I2C controller  
+   \-SCL----- ------            ...12345678...123456789...         ----- -----SCL-/  
 ```  
+
 - I2C协议，两线一时钟(SCL)一数据(SDA)，单线进行数据收发。  
+- 启停信号由主控写控制寄存器触发，不作保存。  
+- 应答信号由字节接收方发起，应答判定结果保存在状态寄存器。  
+- 7位地址+1位读写标记，构成8位保存在地址寄存器，由主控发起。  
+- 8位数据，保存在数据寄存器。  
 
 #### 🧩 I2C_BUS的实现框架  
 ```  
