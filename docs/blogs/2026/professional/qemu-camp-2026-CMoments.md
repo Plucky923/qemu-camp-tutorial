@@ -186,7 +186,7 @@ qdev_connect_gpio_out_named(spi_dev,"cs",0,flash_cs_in);
 
 #### GPIO 总结
 
-总结可以发现，IRQ 作为中断线，是 GPIO 的一个特例，由 qemu core 的中断控制器模块与 GPIO 提供的接口进行了一个封装，提供了非常简洁的接口。Flash 设备的 SSI 总线则是手动对 GPIO 的一个封装，这个总线是Flash设备和SPI控制器之间的连线，更能体现具体的实现细节。
+总结可以发现，IRQ 作为中断线，是 GPIO 的一个特例，由 qemu core 的中断控制器模块与 GPIO 提供的接口进行了一个封装，提供了非常简洁的接口。Flash 设备的 SSI 总线则是手动对 GPIO 的一个封装，这个总线是 Flash 设备和 SPI 控制器之间的连线，更能体现具体的实现细节。
 也可以发现，这些 API 虽然多，但是离不开三种操作类型：
 
 - 1️⃣ init 系列函数 - **创建** GPIO
