@@ -32,8 +32,10 @@
 - 主控总线和从机特性的实现的crate(`i2c_core`)仅在RUST内部供主控和从机的实现使用。  
 - 从机外设的实现将在crate(`i2c_slave`)以mod形式存在，每个从机外设都为独立的mod。  
 
-### 🛠️ 项目构建所需修改文件  
-``` bash  
+---  
+
+### 🛠️ 项目构建所需修改文件清单  
+```bash  
 "./hw/i2c/Kconfig"                    # I2C驱动配置，新增GPIO_I2C编译项，关联Rust实现驱动  
 "./hw/riscv/Kconfig"                  # RISC-V主板配置，GEVICO_G233平台新增GPIO_I2C外设依赖  
 
@@ -49,8 +51,8 @@
 - `./rust/Cargo.toml`顶层`workspace`添加相应的`crate`，这样lsp才能生效，必要时`cargo clean`。  
 - `./rust/hw/i2c/gpio_i2c/meson.build`文件中`_gpio_i2c_rs`需要添加`{'.': _gpio_i2c_bindings_inc_rs},` 。  
 
-### 🛠️ 项目混合编程对接文件  
-``` bash  
+### 🛠️ 项目混合编程对接文件清单  
+```bash  
 "./rust/hw/i2c/gpio_i2c/wrapper.h"        # 专供bindgen解析的适配头，修复工具解析报错并引入标准C头文件  
 "./rust/hw/i2c/gpio_i2c/src/bindings.rs"  # 导入bindgen生成的QEMU的C接口绑定代码，Rust通过其调用C侧接口  
 
@@ -61,13 +63,61 @@
 "./hw/riscv/g233.c"                       # 调用控制器create实现  
 ```  
 
-- `gpio_i2c_create`和`gpio-i2c`这两个符号在C和RUST中是对应的。  
+- `gpio_i2c_create`和`gpio-i2c`这两个符号在C和RUST中是对应的，  
 - 主要涉及文件`./include/hw/i2c/gpio_i2c.h`和`./rust/hw/i2c/gpio_i2c/src/lib.rs`。  
 
 ---  
 
+### 🛠️ 核心编译配置及板级适配代码  
+
+- `./hw/riscv/Kconfig`  
+```kconfig  
+config GEVICO_G233  
+    bool  
+    # ... ...  
+    select PL011  
+    select GPIO_I2C  
+    select RUST_SPI  
+    # ... ...  
+```  
+
+- `./include/hw/riscv/g233.h`  
+```c  
+enum {  
+    // ... ...  
+    VIRT_UART0,  
+    VIRT_GPIO_I2C,  
+    VIRT_RUST_SPI,  
+    // ... ...  
+};  
+```  
+
+- `./hw/riscv/g233.c`  
+```c  
+static const MemMapEntry virt_memmap[] = {  
+    // ... ...  
+    [VIRT_UART0] =        { 0x10000000,         0x100 },  
+    [VIRT_GPIO_I2C] =     { 0x10013000,         0x100 },  
+    [VIRT_RUST_SPI] =     { 0x10019000,         0x100 },  
+    // ... ...  
+};  
+
+// ... ...  
+
+static void virt_machine_init(MachineState *machine)  
+{  
+    // ... ...  
+    pl011_create(s->memmap[VIRT_UART0].base, qdev_get_gpio_in(mmio_irqchip, UART0_IRQ), serial_hd(0));  
+    gpio_i2c_create(s->memmap[VIRT_GPIO_I2C].base);  
+    rust_spi_create(s->memmap[VIRT_RUST_SPI].base);  
+    // ... ...  
+}  
+```  
+
+---  
+
 ### 🧩 GPIO_I2C主控的极简实现框架  
-``` rust  
+```rust  
 // QEMU硬件抽象层  
 pub struct GPIOI2CRegisters {}  // 寄存器，存放设备所有寄存器  
 pub struct GPIOI2CState {}      // QOM设备模型，存放设备运行状态  
@@ -145,7 +195,7 @@ I2C peripheral                                                                I2
 - 8位数据，保存在数据寄存器。  
 
 ### 🧩 I2C_BUS的实现框架  
-``` rust  
+```rust  
 pub struct I2CBus {  
     devices: Vec<Box<dyn I2CSlave>>,  // 挂载在总线上的从机列表  
     current_addr: Option<u8>,         // 当前正在通信的从机地址  
@@ -169,7 +219,7 @@ impl I2CBus {
 - I2C_Bus的实现是在RUST实验一核心代码上稍作修改完成。  
 
 ### 🧩 I2C_SLAVE的实现框架  
-``` rust  
+```rust  
 pub struct AT24C02Slave {  
     pub addr      : u8,         // 从机设备地址  
     pub regs      : [u8; 256],  // EEPROM存储数组  
@@ -189,7 +239,7 @@ impl I2CSlave for AT24C02Slave {
 ---  
 
 ### 📦 GPIO_I2C主控的寄存器写根据I2C协议的实现  
-``` rust  
+```rust  
 impl GPIOI2CRegisters {  
 
     pub(self) fn read(&mut self, offset: RegisterOffset) -> u32 {  

@@ -33,7 +33,7 @@
 - 从机外设的实现将在crate(`ssi_slave`)以mod形式存在，每个从机外设都为独立的mod。  
 
 ### 🛠️ 项目构建所需修改文件  
-``` bash  
+```bash  
 "./hw/ssi/Kconfig"                    # SSI驱动配置，新增RUST_SPI编译项，关联Rust实现驱动  
 "./hw/riscv/Kconfig"                  # RISC-V主板配置，GEVICO_G233平台新增RUST_SPI外设依赖  
 
@@ -50,7 +50,7 @@
 - `./rust/hw/ssi/rust_spi/meson.build`文件中`_rust_spi_rs`需要添加`{'.': _rust_spi_bindings_inc_rs},` 。  
 
 ### 🛠️ 项目混合编程对接文件  
-``` bash  
+```bash  
 "./rust/hw/ssi/rust_spi/wrapper.h"        # 专供bindgen解析的适配头，修复工具解析报错并引入标准C头文件  
 "./rust/hw/ssi/rust_spi/src/bindings.rs"  # 导入bindgen生成的QEMU的C接口绑定代码，Rust通过其调用C侧接口  
 
@@ -66,8 +66,56 @@
 
 ---  
 
+### 🛠️ 核心编译配置及板级适配代码  
+
+- `./hw/riscv/Kconfig`  
+```kconfig  
+config GEVICO_G233  
+    bool  
+    # ... ...  
+    select PL011  
+    select GPIO_I2C  
+    select RUST_SPI  
+    # ... ...  
+```  
+
+- `./include/hw/riscv/g233.h`  
+```c  
+enum {  
+    // ... ...  
+    VIRT_UART0,  
+    VIRT_GPIO_I2C,  
+    VIRT_RUST_SPI,  
+    // ... ...  
+};  
+```  
+
+- `./hw/riscv/g233.c`  
+```c  
+static const MemMapEntry virt_memmap[] = {  
+    // ... ...  
+    [VIRT_UART0] =        { 0x10000000,         0x100 },  
+    [VIRT_GPIO_I2C] =     { 0x10013000,         0x100 },  
+    [VIRT_RUST_SPI] =     { 0x10019000,         0x100 },  
+    // ... ...  
+};  
+
+// ... ...  
+
+static void virt_machine_init(MachineState *machine)  
+{  
+    // ... ...  
+    pl011_create(s->memmap[VIRT_UART0].base, qdev_get_gpio_in(mmio_irqchip, UART0_IRQ), serial_hd(0));  
+    gpio_i2c_create(s->memmap[VIRT_GPIO_I2C].base);  
+    rust_spi_create(s->memmap[VIRT_RUST_SPI].base);  
+    // ... ...  
+}  
+```  
+
+---  
+
 ### 🧩 RUST_SPI主控的极简实现框架  
-``` rust  
+```rust  
 // QEMU硬件抽象层  
 pub struct RUSTSPIRegisters {}  // 寄存器，存放设备所有寄存器  
 pub struct RUSTSPIState {}      // QOM设备模型，存放设备运行状态  
@@ -145,7 +193,7 @@ SPI peripheral                            SPI controller
 - 协议没有启停信号、应答位、读写标记，四线通信逻辑实现更加简单。  
 
 ### 🧩 SSI_BUS的实现框架  
-``` rust  
+```rust  
 pub struct SSIBus {  
     devices: Vec<Box<dyn SSISlave>>,  // 挂载的从机列表  
     current_cs: u8,                   // 当前选中片选编号  
@@ -163,7 +211,7 @@ impl SSIBus {
 - 未作总线事件分层抽象，数据收发逻辑统一封装在单一传输函数，有待优化。  
 
 ### 🧩 SSI_SLAVE的实现框架  
-``` rust  
+```rust  
 pub struct AT25Slave {  
     pub cs_id   : u8,         // 绑定的片选编号  
     pub regs    : [u8; 256],  // 256字节模拟存储区  
@@ -186,7 +234,7 @@ impl SSISlave for AT25Slave {
 ---  
 
 ### 📦 RUST_SPI主控的寄存器写根据SSI协议的实现  
-``` rust  
+```rust  
 impl RUSTSPIRegisters {  
 
     pub(self) fn read(&mut self, offset: RegisterOffset) -> u32 {  
