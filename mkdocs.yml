@@ -282,6 +282,10 @@ nav:
         - Old-cpu: blogs/2026/professional/qemu-camp-2026-Old-cpu.md
         - GrexLoong: blogs/2026/professional/qemu-camp-2026-GrexLoong.md
         - lwenj03: blogs/2026/professional/qemu-camp-2026-lwenj03.md
+        - ovwxxwvo:
+          - RUST实验 i2c-bus:  blogs/2026/professional/qemu-camp-2026-ovwxxwvo/01_i2c-bus.md
+          - RUST实验 gpio-i2c: blogs/2026/professional/qemu-camp-2026-ovwxxwvo/02_gpio-i2c.md
+          # - RUST实验 rust-spi: blogs/2026/professional/qemu-camp-2026-ovwxxwvo/03_rust-spi.md
       - 项目阶段:
         - 暂无文章: blogs/2026/project/project-stage.md
     - 训练营 2025:
