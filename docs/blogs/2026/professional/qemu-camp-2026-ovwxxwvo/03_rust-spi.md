@@ -4,7 +4,7 @@
 
     - 作者：[@ovwxxwvo](https://github.com/ovwxxwvo)  
 
-完整实现代码可参考仓库([qemu-camp-2026-exper-ovwxxwvo](https://github.com/gevico/qemu-camp-2026-exper-ovwxxwvo))  
+完整实现代码可参考仓库 ([qemu-camp-2026-exper-ovwxxwvo](https://github.com/gevico/qemu-camp-2026-exper-ovwxxwvo))  
 
 ---  
 
@@ -27,10 +27,10 @@
 │       └── lib.rs  
 ```  
 
-- 项目文件结构的设计是为了减少QEMU的C代码对RUST代码的多次调用。  
-- 主控设备实现的crate(rust_spi)是唯一提供给QEMU调用的接口，每个主控都是独立的crate。  
-- 主控总线和从机特性的实现的crate(ssi_core)仅在RUST内部供主控和从机的实现使用。  
-- 从机外设的实现将在crate(ssi_slave)以mod形式存在，每个从机外设都为独立的mod。  
+- 项目文件结构的设计是为了减少 QEMU 的 C 代码对 RUST 代码的多次调用。  
+- 主控设备实现的 crate(rust_spi) 是唯一提供给 QEMU 调用的接口，每个主控都是独立的 crate。  
+- 主控总线和从机特性的实现的 crate(ssi_core) 仅在 RUST 内部供主控和从机的实现使用。  
+- 从机外设的实现将在 crate(ssi_slave) 以 mod 形式存在，每个从机外设都为独立的 mod。  
 
 ### 🛠️ 项目构建所需修改文件  
 ```  
@@ -47,7 +47,7 @@
 ```  
 
 - `./rust/Cargo.toml`顶层`workspace`添加相应的`crate`，  
-  这样lsp才能生效，必要时`cargo clean`。  
+  这样 lsp 才能生效，必要时`cargo clean`。  
 - `./rust/hw/ssi/rust_spi/meson.build`文件中`_rust_spi_rs`需要添加  
   `{'.': _rust_spi_bindings_inc_rs},` 。  
 
@@ -63,12 +63,12 @@
 ./hw/riscv/g233.c                       // 调用控制器create实现  
 ```  
 
-- `rust_spi_create`和`rust-spi`这两个符号在C和RUST中是对应的。  
+- `rust_spi_create`和`rust-spi`这两个符号在 C 和 RUST 中是对应的。  
 - 主要涉及文件`./include/hw/ssi/rust_spi.h`和`./rust/hw/ssi/rust_spi/src/lib.rs`。  
 
 ---  
 
-### 🧩 RUST_SPI主控的极简实现框架  
+### 🧩 RUST_SPI 主控的极简实现框架  
 ```  
 // QEMU硬件抽象层  
 pub struct RUSTSPIRegisters {}  // 寄存器，存放设备所有寄存器  
@@ -95,12 +95,12 @@ impl RUSTSPIState {}                           // 实现数据收发工具函数
 pub unsafe extern "C" fn rust_spi_create()     // 创建实例化设备，供QEMU的C代码调用  
 ```  
 
-- RUST_SPI主控设备为极简实现，未实现中断逻辑和复位逻辑。(仿pl011)  
-- 寄存器的地址偏移和特定寄存器结构体在同crate的`registers.rs`中定义。  
-- SSI总线在`ssi_core`的crate中的`core.rs`中定义。  
-- SSI从机在`ssi_slave`的crate中进行不同外设的定义。  
+- RUST_SPI 主控设备为极简实现，未实现中断逻辑和复位逻辑。(仿 pl011)  
+- 寄存器的地址偏移和特定寄存器结构体在同 crate 的`registers.rs`中定义。  
+- SSI 总线在`ssi_core`的 crate 中的`core.rs`中定义。  
+- SSI 从机在`ssi_slave`的 crate 中进行不同外设的定义。  
 
-### 🔗 RUST_SPI主控的业务函数调用链条  
+### 🔗 RUST_SPI 主控的业务函数调用链条  
 ```  
 rust_spi_create  
   └> RUSTSPIState::new  
@@ -123,11 +123,11 @@ qtest_writel -> RUSTSPI_OPS.write -> RUSTSPIState::write -> RUSTSPIRegisters::wr
 - `RUSTSPIState::init`初始化由`RUSTSPIState::new`构造间接调用。  
 - `RUSTSPIState::realize`实体化由`RUSTSPIState::sysbus_realize`实现间接调用。  
 - `SSIBus`分别在`RUSTSPIState`的`init`和`realize`中进行创建和从机挂载。  
-- SSI主从数据传输仅由写控制寄存器触发，写入其余寄存器和读取所有寄存器不触发总线通信。  
+- SSI 主从数据传输仅由写控制寄存器触发，写入其余寄存器和读取所有寄存器不触发总线通信。  
 
 ---  
 
-### 🔄 SSI协议数据流转  
+### 🔄 SSI 协议数据流转  
 ```  
              sys-bus                      ssi-bus  
  risc-v --<----------->-- ssi-master --<----------->-- ssi-slave  
@@ -141,9 +141,9 @@ SPI device                                SPI controller
   \---CS-----      NCS|NSS(CS)      -----CS---/  
 ```  
 
-- SSI协议，两线一时钟(SCL)一数据(SDA)，单线进行数据收发。  
+- SSI 协议，两线一时钟 (SCL) 一数据 (SDA)，单线进行数据收发。  
 
-### 🧩 SSI_BUS的实现框架  
+### 🧩 SSI_BUS 的实现框架  
 ```  
 pub struct SSIBus {  
     devices: Vec<Box<dyn SSISlave>>,  
@@ -160,7 +160,7 @@ impl SSIBus {
 }  
 ```  
 
-### 🧩 SSI_SLAVE的实现框架  
+### 🧩 SSI_SLAVE 的实现框架  
 ```  
 pub struct AT25Slave {  
     pub cs_id   : u8,  
@@ -182,7 +182,7 @@ impl SSISlave for AT25Slave {
 
 ---  
 
-### 📦 RUST_SPI主控的寄存器写根据SSI协议的实现  
+### 📦 RUST_SPI 主控的寄存器写根据 SSI 协议的实现  
 ```  
 impl RUSTSPIRegisters {  
 
@@ -228,14 +228,14 @@ impl RUSTSPIRegisters {
 
 }  
 ```  
-- SSI主从数据传输由写控制寄存器触发，需实现5个逻辑分支：  
+- SSI 主从数据传输由写控制寄存器触发，需实现 5 个逻辑分支：  
 
 ---  
 
 ### 📝 总结  
 
 - 文中目录结构、文件清单、代码框架均可直接复用，更换协议就能移植其他外设。  
-- RUST和C的多语言混合编程工程搭建繁琐，可在着手实现具体逻辑前修改涉及文件。  
-- 了解QEMU设备的实现框架，理清函数调用链路，关键业务代码是实现主控寄存器基于协议的读写逻辑。  
-- 项目未用到GDB调试，有待进一步学习，不懂知识由豆包协助推进。  
+- RUST 和 C 的多语言混合编程工程搭建繁琐，可在着手实现具体逻辑前修改涉及文件。  
+- 了解 QEMU 设备的实现框架，理清函数调用链路，关键业务代码是实现主控寄存器基于协议的读写逻辑。  
+- 项目未用到 GDB 调试，有待进一步学习，不懂知识由豆包协助推进。  
 
