@@ -73,7 +73,7 @@ mdlint: install-node ## 严格检查已修改/新增的 Markdown 文件
 		$(MARKDOWNLINT) $(MD_PATHS); \
 	fi
 
-serve: install-python ## 启动本地文档预览（自动使用 .venv）
+serve: install-python vendor ## 启动本地文档预览（自动使用 .venv，先确保 mermaid 等运行时资源就位）
 	$(ZENSICAL) serve
 
 build: install-python vendor ## 构建文档站点

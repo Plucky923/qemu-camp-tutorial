@@ -15,18 +15,24 @@ MERMAID_VERSION="11.4.1"
 MERMAID_URL="https://registry.npmmirror.com/mermaid/${MERMAID_VERSION}/files/dist/mermaid.min.js"
 MERMAID_SHA256="a43bc1afd446f9c4cc66ac5dd45d02e8d65e26fc5344ec0ef787f88d6ddb6f9e"
 TARGET="$(cd "$(dirname "$0")/.." && pwd)/docs/plugins/javascripts/mermaid.min.js"
+# 先下载到临时文件，checksum 通过后再原子替换，避免中断留下半截文件
+# （半截文件会让 make 误以为 target 已存在而跳过下载）。
+TMP="$(dirname "$TARGET")/.mermaid.min.js.$$"
+
+cleanup() { rm -f "$TMP"; }
+trap cleanup EXIT
 
 mkdir -p "$(dirname "$TARGET")"
 echo "Downloading mermaid@${MERMAID_VERSION} ..."
 if command -v curl >/dev/null 2>&1; then
-    curl -fsSL --retry 3 --connect-timeout 15 "$MERMAID_URL" -o "$TARGET"
+    curl -fsSL --retry 3 --connect-timeout 15 "$MERMAID_URL" -o "$TMP"
 else
-    wget -q --tries=3 --timeout=15 "$MERMAID_URL" -O "$TARGET"
+    wget -q --tries=3 --timeout=15 "$MERMAID_URL" -O "$TMP"
 fi
 
-echo "$MERMAID_SHA256  $TARGET" | sha256sum -c - || {
+echo "$MERMAID_SHA256  $TMP" | sha256sum -c - >/dev/null || {
     echo "ERROR: SHA256 mismatch, download may be corrupted" >&2
-    rm -f "$TARGET"
     exit 1
 }
+mv "$TMP" "$TARGET"
 echo "OK: $TARGET"
