@@ -14,3 +14,12 @@
     先阅读所选方向的课程文章，再回顾文章列出的基础与专业阶段讲义，最后进入对应的项目任务页。项目过程中遇到新的机制问题时，可以回到这里补齐知识，而不必把任务说明当作教材使用。
 
 [project-stage]: ../../../exercise/2026/stage3/index.md
+
+## OCEAN IPDPS 2026 Tutorial 课件
+
+本课件用于“基于 CXLMemSim 和 QEMU 的 GPU 可观测系统构建”方向。当前公开版本为
+`draft`，无需安装 PowerPoint 即可使用 PDF 预览。
+
+- [在线预览：PDF](https://github.com/gevico/qemu-camp-tutorial/releases/download/ocean-ipdps-2026-draft/OCEAN_IPDPS_2026_tutorial_draft.pdf)
+- [下载源文件：PPTX](./OCEAN_IPDPS_2026_tutorial_draft.pptx)
+- [课件资源页：版本、授权与更新流程](./ocean-ipdps-2026-tutorial.md)
