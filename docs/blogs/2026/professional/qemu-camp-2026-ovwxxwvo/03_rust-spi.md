@@ -4,22 +4,22 @@
 
     - 作者：[@ovwxxwvo](https://github.com/ovwxxwvo)  
 
-完整实现代码可参考仓库 ([qemu-camp-2026-exper-ovwxxwvo](https://github.com/gevico/qemu-camp-2026-exper-ovwxxwvo))  
+完整实现代码可参考仓库([qemu-camp-2026-exper-ovwxxwvo](https://github.com/gevico/qemu-camp-2026-exper-ovwxxwvo))  
 
 ---  
 
 ### 📁 项目主要目录结构  
 ```  
 ./rust/hw/ssi/  
-├── ssi_core             // ssi通用核心实现  
+├── ssi_core             # ssi通用核心实现  
 │   └── src  
 │       ├── core.rs  
 │       └── lib.rs  
-├── ssi_slave            // ssi各种从机外设实现  
+├── ssi_slave            # ssi各种从机外设实现  
 │   └── src  
 │       ├── at24c02.rs  
 │       └── lib.rs  
-├── rust_spi             // ssi具体控制器实现  
+├── rust_spi             # ssi具体控制器实现  
 │   └── src  
 │       ├── bindings.rs  
 │       ├── registers.rs  
@@ -27,49 +27,95 @@
 │       └── lib.rs  
 ```  
 
-- 项目文件结构的设计是为了减少 QEMU 的 C 代码对 RUST 代码的多次调用。  
-- 主控设备实现的 crate(rust_spi) 是唯一提供给 QEMU 调用的接口，每个主控都是独立的 crate。  
-- 主控总线和从机特性的实现的 crate(ssi_core) 仅在 RUST 内部供主控和从机的实现使用。  
-- 从机外设的实现将在 crate(ssi_slave) 以 mod 形式存在，每个从机外设都为独立的 mod。  
+- 项目文件结构的设计是为了减少QEMU的C代码对RUST代码的多次调用。  
+- 主控设备实现的crate(`rust_spi`)是唯一提供给QEMU调用的接口，每个主控都是独立的crate。  
+- 主控总线和从机特性的实现的crate(`ssi_core`)仅在RUST内部供主控和从机的实现使用。  
+- 从机外设的实现将在crate(`ssi_slave`)以mod形式存在，每个从机外设都为独立的mod。  
 
 ### 🛠️ 项目构建所需修改文件  
+```bash  
+"./hw/ssi/Kconfig"                    # SSI驱动配置，新增RUST_SPI编译项，关联Rust实现驱动  
+"./hw/riscv/Kconfig"                  # RISC-V主板配置，GEVICO_G233平台新增RUST_SPI外设依赖  
+
+"./rust/Cargo.toml"                   # 顶层workspace添加相应crate  
+
+"./rust/hw/ssi/Kconfig"               # 添加子项  
+"./rust/hw/ssi/meson.build"           # 添加子项  
+
+"./rust/hw/ssi/rust_spi/meson.build"  # 注意添加bindgen相关  
+"./rust/hw/ssi/rust_spi/Cargo.toml"   # 注意依赖相对路径层级  
 ```  
-./hw/ssi/Kconfig                    // SSI驱动配置，新增RUST_SPI编译项，关联Rust实现驱动  
-./hw/riscv/Kconfig                  // RISC-V主板配置，GEVICO_G233平台新增RUST_SPI外设依赖  
 
-./rust/Cargo.toml                   // 顶层workspace添加相应crate  
-
-./rust/hw/ssi/Kconfig               // 添加子项  
-./rust/hw/ssi/meson.build           // 添加子项  
-
-./rust/hw/ssi/rust_spi/meson.build  // 注意添加bindgen相关  
-./rust/hw/ssi/rust_spi/Cargo.toml   // 注意依赖相对路径层级  
-```  
-
-- `./rust/Cargo.toml`顶层`workspace`添加相应的`crate`，  
-  这样 lsp 才能生效，必要时`cargo clean`。  
-- `./rust/hw/ssi/rust_spi/meson.build`文件中`_rust_spi_rs`需要添加  
-  `{'.': _rust_spi_bindings_inc_rs},` 。  
+- `./rust/Cargo.toml`顶层`workspace`添加相应的`crate`，这样lsp才能生效，必要时`cargo clean`。  
+- `./rust/hw/ssi/rust_spi/meson.build`文件中`_rust_spi_rs`需要添加`{'.': _rust_spi_bindings_inc_rs},` 。  
 
 ### 🛠️ 项目混合编程对接文件  
+```bash  
+"./rust/hw/ssi/rust_spi/wrapper.h"        # 专供bindgen解析的适配头，修复工具解析报错并引入标准C头文件  
+"./rust/hw/ssi/rust_spi/src/bindings.rs"  # 导入bindgen生成的QEMU的C接口绑定代码，Rust通过其调用C侧接口  
+
+"./include/hw/ssi/rust_spi.h"             # 声明C接口函数符号，供C代码调用Rust实现  
+"./rust/hw/ssi/rust_spi/src/lib.rs"       # 导出Rust功能实现，对接C声明接口函数符号  
+
+"./include/hw/riscv/g233.h"               # 声明项目相关内存映射枚举  
+"./hw/riscv/g233.c"                       # 调用控制器create实现  
 ```  
-./rust/hw/ssi/rust_spi/wrapper.h        // 专供bindgen解析的适配头，修复工具解析报错并引入标准C头文件  
-./rust/hw/ssi/rust_spi/src/bindings.rs  // 导入bindgen生成的QEMU的C接口绑定代码，Rust通过其调用C侧接口  
 
-./include/hw/ssi/rust_spi.h             // 声明C接口函数符号，供C代码调用Rust实现  
-./rust/hw/ssi/rust_spi/src/lib.rs       // 导出Rust功能实现，对接C声明接口函数符号  
-
-./include/hw/riscv/g233.h               // 声明项目相关内存映射枚举  
-./hw/riscv/g233.c                       // 调用控制器create实现  
-```  
-
-- `rust_spi_create`和`rust-spi`这两个符号在 C 和 RUST 中是对应的。  
+- `rust_spi_create`和`rust-spi`这两个符号在C和RUST中是对应的。  
 - 主要涉及文件`./include/hw/ssi/rust_spi.h`和`./rust/hw/ssi/rust_spi/src/lib.rs`。  
 
 ---  
 
-### 🧩 RUST_SPI 主控的极简实现框架  
+### 🛠️ 核心编译配置及板级适配代码  
+
+- `./hw/riscv/Kconfig`  
+```kconfig  
+config GEVICO_G233  
+    bool  
+    # ... ...  
+    select PL011  
+    select GPIO_I2C  
+    select RUST_SPI  
+    # ... ...  
 ```  
+
+- `./include/hw/riscv/g233.h`  
+```c  
+enum {  
+    // ... ...  
+    VIRT_UART0,  
+    VIRT_GPIO_I2C,  
+    VIRT_RUST_SPI,  
+    // ... ...  
+};  
+```  
+
+- `./hw/riscv/g233.c`  
+```c  
+static const MemMapEntry virt_memmap[] = {  
+    // ... ...  
+    [VIRT_UART0] =        { 0x10000000,         0x100 },  
+    [VIRT_GPIO_I2C] =     { 0x10013000,         0x100 },  
+    [VIRT_RUST_SPI] =     { 0x10019000,         0x100 },  
+    // ... ...  
+};  
+
+// ... ...  
+
+static void virt_machine_init(MachineState *machine)  
+{  
+    // ... ...  
+    pl011_create(s->memmap[VIRT_UART0].base, qdev_get_gpio_in(mmio_irqchip, UART0_IRQ), serial_hd(0));  
+    gpio_i2c_create(s->memmap[VIRT_GPIO_I2C].base);  
+    rust_spi_create(s->memmap[VIRT_RUST_SPI].base);  
+    // ... ...  
+}  
+```  
+
+---  
+
+### 🧩 RUST_SPI主控的极简实现框架  
+```rust  
 // QEMU硬件抽象层  
 pub struct RUSTSPIRegisters {}  // 寄存器，存放设备所有寄存器  
 pub struct RUSTSPIState {}      // QOM设备模型，存放设备运行状态  
@@ -95,12 +141,12 @@ impl RUSTSPIState {}                           // 实现数据收发工具函数
 pub unsafe extern "C" fn rust_spi_create()     // 创建实例化设备，供QEMU的C代码调用  
 ```  
 
-- RUST_SPI 主控设备为极简实现，未实现中断逻辑和复位逻辑。(仿 pl011)  
-- 寄存器的地址偏移和特定寄存器结构体在同 crate 的`registers.rs`中定义。  
-- SSI 总线在`ssi_core`的 crate 中的`core.rs`中定义。  
-- SSI 从机在`ssi_slave`的 crate 中进行不同外设的定义。  
+- RUST_SPI主控设备为极简实现，未实现中断逻辑和复位逻辑。(仿pl011)  
+- 寄存器的地址偏移和特定寄存器结构体在同crate的`registers.rs`中定义。  
+- SSI总线在`ssi_core`的crate中的`core.rs`中定义。  
+- SSI从机在`ssi_slave`的crate中进行不同外设的定义。  
 
-### 🔗 RUST_SPI 主控的业务函数调用链条  
+### 🔗 RUST_SPI主控的业务函数调用链条  
 ```  
 rust_spi_create  
   └> RUSTSPIState::new  
@@ -123,67 +169,72 @@ qtest_writel -> RUSTSPI_OPS.write -> RUSTSPIState::write -> RUSTSPIRegisters::wr
 - `RUSTSPIState::init`初始化由`RUSTSPIState::new`构造间接调用。  
 - `RUSTSPIState::realize`实体化由`RUSTSPIState::sysbus_realize`实现间接调用。  
 - `SSIBus`分别在`RUSTSPIState`的`init`和`realize`中进行创建和从机挂载。  
-- SSI 主从数据传输仅由写控制寄存器触发，写入其余寄存器和读取所有寄存器不触发总线通信。  
+- SSI主从数据传输仅由写数据寄存器触发，写入其余寄存器和读取所有寄存器不触发总线通信。  
 
 ---  
 
-### 🔄 SSI 协议数据流转  
+### 🔄 SSI协议数据流转  
 ```  
              sys-bus                      ssi-bus  
- risc-v --<----------->-- ssi-master --<----------->-- ssi-slave  
+ risc-v --<----------->-- spi-master --<----------->-- ssi-slave  
 processor                 controller                   peripheral  
 ```  
 ```  
-  /--MOSI-<-- 8addr+8data+8data+... --<-MOSI--\  
- / /-MISO->-- 8addr+8data+8data+... -->-MISO-\ \  
-SPI device                                SPI controller  
- \ \-SCLK---- .12345678...12345678. ----Sclk-/ /  
-  \---CS-----      NCS|NSS(CS)      -----CS---/  
+    /--MOSI-<-- 8addr+8data+8data+... --<-MOSI--\  
+   / /-MISO->-- 8addr+8data+8data+... -->-MISO-\ \  
+SPI peripheral                            SPI controller  
+   \ \-SCLK---- .12345678...12345678. ----SCLK-/ /  
+    \---CS-----      NCS|NSS(CS)      -----CS---/  
 ```  
 
-- SSI 协议，两线一时钟 (SCL) 一数据 (SDA)，单线进行数据收发。  
+- SSI协议，四线，片选(CS)、时钟(SCLK)、主出从入(MOSI)、主入从出(MISO)，两线双向数据收发。  
+- 主控选择哪个从机通信，依靠独立片选硬件引脚，有独立的片选寄存器。  
+- 数据包中的8位数据地址为从机外设存储偏移地址。  
+- 协议没有启停信号、应答位、读写标记，四线通信逻辑实现更加简单。  
 
-### 🧩 SSI_BUS 的实现框架  
-```  
+### 🧩 SSI_BUS的实现框架  
+```rust  
 pub struct SSIBus {  
-    devices: Vec<Box<dyn SSISlave>>,  
-    current_cs: u8,  
+    devices: Vec<Box<dyn SSISlave>>,  // 挂载的从机列表  
+    current_cs: u8,                   // 当前选中片选编号  
 }  
 
 impl SSIBus {  
-    pub fn new() -> Self {  
-    pub fn device_count(&self) -> usize {  
+    pub fn new           // 创建总线，初始化设备列表及当前片选编号  
+    pub fn device_count  // 统计总线上挂载的从设备数量  
 
-    pub fn attach(&mut self, device: Box<dyn SSISlave> ) {  
-    pub fn chip_select(&mut self, new_cs: u8) {  
-    pub fn transfer(&mut self, val: u8) -> u8 {  
+    pub fn attach        // 挂载从机到总线  
+    pub fn chip_select   // 切换片选信号  
+    pub fn transfer      // 完成数据收发传输  
 }  
 ```  
+- 未作总线事件分层抽象，数据收发逻辑统一封装在单一传输函数，有待优化。  
 
-### 🧩 SSI_SLAVE 的实现框架  
-```  
+### 🧩 SSI_SLAVE的实现框架  
+```rust  
 pub struct AT25Slave {  
-    pub cs_id   : u8,  
-    pub regs    : [u8; 256],  
-    pub pointer : u8,  
-    pub is_addr : bool,  
-    pub is_write: bool,  
-    pub is_read : bool,  
-    pub sr      : u8,  
-    pub send_sr : bool,  
+    pub cs_id   : u8,         // 绑定的片选编号  
+    pub regs    : [u8; 256],  // 256字节模拟存储区  
+    pub pointer : u8,         // 内部读写地址指针  
+    pub is_addr : bool,       // 标记当前字节为地址  
+    pub is_write: bool,       // 写操作使能标记  
+    pub is_read : bool,       // 读操作使能标记  
+    pub sr      : u8,         // 设备状态寄存器  
+    pub send_sr : bool,       // 标记是否输出状态寄存器  
 }  
 
 impl SSISlave for AT25Slave {  
-    fn cs_id(&self) -> u8 {  
-    fn set_cs(&mut self, _select: bool){  
-    fn transfer(&mut self, data: u8) -> u8 {  
+    fn cs_id     // 返回自身片选ID  
+    fn set_cs    // 片选选中/取消选中处理  
+    fn transfer  // 单字节数据收发处理  
 }  
 ```  
+- 未作总线事件回调机制，只能依靠新增结构体字段，有待完善。  
 
 ---  
 
-### 📦 RUST_SPI 主控的寄存器写根据 SSI 协议的实现  
-```  
+### 📦 RUST_SPI主控的寄存器写根据SSI协议的实现  
+```rust  
 impl RUSTSPIRegisters {  
 
     pub(self) fn read(&mut self, offset: RegisterOffset) -> u32 {  
@@ -192,6 +243,8 @@ impl RUSTSPIRegisters {
     pub(self) fn write(&mut self, offset: RegisterOffset, value: u32, device: &RUSTSPIState) -> bool {  
         use RegisterOffset::*;  
         match offset {  
+
+        // 写控制寄存器，负责配置、使能，并设置相关标志。  
             CR1 => {  
                 // let mut cr1 = Cr1::from(value);  
                 let cr1 = Cr1::from(value);  
@@ -208,11 +261,15 @@ impl RUSTSPIRegisters {
                 };  
                 self.cr1 = cr1  
             },  
+
+        // 写片选寄存器，负责切换片选信号。  
             CS  => {  
                 let mut ssi_bus = device.ssi_bus.borrow_mut();  
                 ssi_bus.chip_select(value as u8);  
                 self.cs = value;  
             },  
+
+        // SSI主从数据传输由写数据寄存器触发，并设置发送缓存为空和接收缓存非空的状态标志。  
             DR  => {  
                 let tx_byte = value as u8;  
                 let mut ssi_bus = device.ssi_bus.borrow_mut();  
@@ -228,14 +285,22 @@ impl RUSTSPIRegisters {
 
 }  
 ```  
-- SSI 主从数据传输由写控制寄存器触发，需实现 5 个逻辑分支：  
+
+- SSI主从数据传输由写数据寄存器触发，并设置发送缓存为空和接收缓存非空的状态标志。  
+- 写控制寄存器，负责配置、使能，并设置相关标志。  
+- 写片选寄存器，负责切换片选信号。  
 
 ---  
 
 ### 📝 总结  
 
-- 文中目录结构、文件清单、代码框架均可直接复用，更换协议就能移植其他外设。  
-- RUST 和 C 的多语言混合编程工程搭建繁琐，可在着手实现具体逻辑前修改涉及文件。  
-- 了解 QEMU 设备的实现框架，理清函数调用链路，关键业务代码是实现主控寄存器基于协议的读写逻辑。  
-- 项目未用到 GDB 调试，有待进一步学习，不懂知识由豆包协助推进。  
+- 对于项目个人首先考虑文件目录结构和各种文件命名和代码内部命名。  
+- 在QEMU中RUST编程中，对于主控设备及从机外设的硬件仿真建模，一种协议可以对应一个文件夹。  
+- 每个主控设备为一个`crate`，总线共同逻辑抽象为独立`crate`，从机外设集合为独立`crate`。  
+- 总线和从机的逻辑由主控调用，主控作为QEMU中C代码的唯一调用接口。  
+- RUST和C的多语言混合配置构建繁琐，可以把能用的文伯做成清单，逐一修改避免出错。  
+- QEMU设备的实现有相对固定框架，可以复刻`pl011`作名称等相关修改。  
+- 从函数调用链条追踪，最终主控设备协议的主要逻辑在设备寄存器写逻辑中实现。  
+- 协议的总线通信逻辑、总线事件、从机特性都应抽象出来，减少冗余代码。  
+- 项目未用到GDB调试，有待进一步学习，不懂知识由豆包协助推进。  
 
