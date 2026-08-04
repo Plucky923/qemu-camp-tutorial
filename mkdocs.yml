@@ -86,13 +86,18 @@ extra_css:
   - plugins/stylesheets/registration-stats.css
   - plugins/stylesheets/leaderboards.css
   - plugins/stylesheets/ppt-slides.css
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css
 extra_javascript:
   - plugins/javascripts/toc-collapse.js
   - plugins/javascripts/enrollment.js
   - plugins/javascripts/registration-stats.js
   - plugins/javascripts/ppt-slides.js
-  - plugins/javascripts/mathjax-config.js
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js
+  - plugins/javascripts/katex-config.js
+  # mermaid@11.4.1 本地化：bundle 默认从 unpkg.com 懒加载，国内网络不可达导致图表无法渲染。
+  # 需先于 bundle 加载以跳过 unpkg 拉取；文件由 scripts/fetch-mermaid.sh 获取，升级时手动替换。
+  - plugins/javascripts/mermaid.min.js
 
 nav:
   - 主页: index.md
@@ -287,7 +292,7 @@ nav:
           - RUST实验 gpio-i2c: blogs/2026/professional/qemu-camp-2026-ovwxxwvo/02_gpio-i2c.md
           # - RUST实验 rust-spi: blogs/2026/professional/qemu-camp-2026-ovwxxwvo/03_rust-spi.md
       - 项目阶段:
-        - 暂无文章: blogs/2026/project/project-stage.md
+        - random25160765-collab: blogs/2026/project/cxl_blog_rd.md
     - 训练营 2025:
       - 专业阶段总结 LordaeronESZ: blogs/2025/qemu-camp-2025-LordaeronESZ.md
     - 其他技术博客:

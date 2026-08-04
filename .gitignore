@@ -5,3 +5,5 @@
 site
 node_modules
 video
+# 第三方运行时资源，由 scripts/fetch-mermaid.sh 获取
+docs/plugins/javascripts/mermaid.min.js

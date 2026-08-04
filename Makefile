@@ -18,7 +18,7 @@ MD_FILES ?= $(shell { \
 } 2>/dev/null | sed '/^$$/d; /^node_modules\//d; /^\.venv\//d; /^site\//d; /^\.claude\//d' | sort -u)
 MD_PATHS = $(foreach file,$(MD_FILES),:$(file))
 
-.PHONY: help venv setup install install-python install-node format lint mdformat mdlint serve build clean distclean shell
+.PHONY: help venv setup install install-python install-node vendor format lint mdformat mdlint serve build clean distclean shell
 
 help: ## 显示可用命令
 	@awk 'BEGIN {FS = ":.*## "; printf "Usage: make <target>\n\nTargets:\n"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-16s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -43,7 +43,15 @@ install-node: $(NODE_STAMP) ## 安装 Node 依赖
 
 setup: install ## 初始化开发环境
 
-install: install-python install-node ## 安装全部依赖
+MERMAID_JS := docs/plugins/javascripts/mermaid.min.js
+
+install: install-python install-node vendor ## 安装全部依赖
+
+vendor: $(MERMAID_JS) ## 获取第三方运行时资源（mermaid 等）
+	@touch $(MERMAID_JS)
+
+$(MERMAID_JS):
+	@./scripts/fetch-mermaid.sh
 
 format: install-node ## 自动修复中文排版
 	$(AUTOCORRECT) --fix .
@@ -68,7 +76,7 @@ mdlint: install-node ## 严格检查已修改/新增的 Markdown 文件
 serve: install-python ## 启动本地文档预览（自动使用 .venv）
 	$(ZENSICAL) serve
 
-build: install-python ## 构建文档站点
+build: install-python vendor ## 构建文档站点
 	$(ZENSICAL) build --clean
 
 clean: ## 清理构建产物与缓存
