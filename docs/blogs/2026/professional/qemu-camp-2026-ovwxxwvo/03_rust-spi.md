@@ -162,8 +162,8 @@ qtest_readl  -> RUSTSPI_OPS.read  -> RUSTSPIState::read  -> RUSTSPIRegisters::re
 
 qtest_writel -> RUSTSPI_OPS.write -> RUSTSPIState::write -> RUSTSPIRegisters::write  
   ┌-----------------------------------------------------------┘  
-  └> SSI_Bus::transfer_read  -> AT25Slave::recv  
-  └> SSI_Bus::transfer_write -> AT25Slave::send  
+  └> SSI_Bus::transfer -> AT25Slave::transfer  
+  └> SSI_Bus::transfer -> AT25Slave::transfer  
 ```  
 
 - `RUSTSPIState::init`初始化由`RUSTSPIState::new`构造间接调用。  
