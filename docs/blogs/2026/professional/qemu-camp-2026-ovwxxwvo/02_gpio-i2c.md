@@ -4,7 +4,7 @@
 
     - 作者：[@ovwxxwvo](https://github.com/ovwxxwvo)  
 
-完整实现代码可参考仓库([qemu-camp-2026-exper-ovwxxwvo](https://github.com/gevico/qemu-camp-2026-exper-ovwxxwvo))  
+完整实现代码可参考仓库 ([qemu-camp-2026-exper-ovwxxwvo](https://github.com/gevico/qemu-camp-2026-exper-ovwxxwvo))  
 
 ---  
 
@@ -27,10 +27,10 @@
 │       └── lib.rs  
 ```  
 
-- 项目文件结构的设计是为了减少QEMU的C代码对RUST代码的多次调用。  
-- 主控设备实现的crate(`gpio_i2c`)是唯一提供给QEMU调用的接口，每个主控都是独立的crate。  
-- 主控总线和从机特性的实现的crate(`i2c_core`)仅在RUST内部供主控和从机的实现使用。  
-- 从机外设的实现将在crate(`i2c_slave`)以mod形式存在，每个从机外设都为独立的mod。  
+- 项目文件结构的设计是为了减少 QEMU 的 C 代码对 RUST 代码的多次调用。  
+- 主控设备实现的 crate(`gpio_i2c`) 是唯一提供给 QEMU 调用的接口，每个主控都是独立的 crate。  
+- 主控总线和从机特性的实现的 crate(`i2c_core`) 仅在 RUST 内部供主控和从机的实现使用。  
+- 从机外设的实现将在 crate(`i2c_slave`) 以 mod 形式存在，每个从机外设都为独立的 mod。  
 
 ---  
 
@@ -48,7 +48,7 @@
 "./rust/hw/i2c/gpio_i2c/Cargo.toml"   # 注意依赖相对路径层级  
 ```  
 
-- `./rust/Cargo.toml`顶层`workspace`添加相应的`crate`，这样lsp才能生效，必要时`cargo clean`。  
+- `./rust/Cargo.toml`顶层`workspace`添加相应的`crate`，这样 lsp 才能生效，必要时`cargo clean`。  
 - `./rust/hw/i2c/gpio_i2c/meson.build`文件中`_gpio_i2c_rs`需要添加`{'.': _gpio_i2c_bindings_inc_rs},` 。  
 
 ### 🛠️ 项目混合编程对接文件清单  
@@ -63,7 +63,7 @@
 "./hw/riscv/g233.c"                       # 调用控制器create实现  
 ```  
 
-- `gpio_i2c_create`和`gpio-i2c`这两个符号在C和RUST中是对应的，  
+- `gpio_i2c_create`和`gpio-i2c`这两个符号在 C 和 RUST 中是对应的，  
 - 主要涉及文件`./include/hw/i2c/gpio_i2c.h`和`./rust/hw/i2c/gpio_i2c/src/lib.rs`。  
 
 ---  
@@ -116,39 +116,39 @@ static void virt_machine_init(MachineState *machine)
 
 ---  
 
-### 🧩 GPIO_I2C主控的极简实现框架  
+### 🧩 GPIO_I2C 主控的极简实现框架  
 ```rust  
-// QEMU硬件抽象层  
+// QEMU 硬件抽象层  
 pub struct GPIOI2CRegisters {}  // 寄存器，存放设备所有寄存器  
-pub struct GPIOI2CState {}      // QOM设备模型，存放设备运行状态  
-pub struct GPIOI2CClass {}      // QOM设备类，存放设备固定属性  
+pub struct GPIOI2CState {}      // QOM 设备模型，存放设备运行状态  
+pub struct GPIOI2CClass {}      // QOM 设备类，存放设备固定属性  
 
-// 业务特性，强制设备挂载系统总线并规定设备唯一ID  
+// 业务特性，强制设备挂载系统总线并规定设备唯一 ID  
 trait GPIOI2CImpl: SysBusDeviceImpl + IsA<GPIOI2CState> {}  
 
-// QEMU框架适配层  
-impl GPIOI2CClass {}                           // 保存设备ID，调用父类初始化  
-unsafe impl ObjectType for GPIOI2CState {}     // 绑定实例类对象，设备命名供QEMU使用  
-impl GPIOI2CImpl for GPIOI2CState {}           // 定义设备ID  
+// QEMU 框架适配层  
+impl GPIOI2CClass {}                           // 保存设备 ID，调用父类初始化  
+unsafe impl ObjectType for GPIOI2CState {}     // 绑定实例类对象，设备命名供 QEMU 使用  
+impl GPIOI2CImpl for GPIOI2CState {}           // 定义设备 ID  
 impl ObjectImpl for GPIOI2CState {}            // 绑定设备完整生命周期函数  
 impl DeviceImpl for GPIOI2CState {}            // 启用设备，创建设备硬件资源  
 impl ResettablePhasesImpl for GPIOI2CState {}  // 复位回调，虚拟机复位时恢复硬件初始状态  
-impl SysBusDeviceImpl for GPIOI2CState {}      // 挂载设备到系统总线，绑定MMIO访问入口  
+impl SysBusDeviceImpl for GPIOI2CState {}      // 挂载设备到系统总线，绑定 MMIO 访问入口  
 
-// QEMU业务接口层  
+// QEMU 业务接口层  
 impl GPIOI2CRegisters {}                       // 实现寄存器读写及复位逻辑  
 impl GPIOI2CState {}                           // 实现数据收发工具函数  
 
 // 导出设备创建函数  
-pub unsafe extern "C" fn gpio_i2c_create()     // 创建实例化设备，供QEMU的C代码调用  
+pub unsafe extern "C" fn gpio_i2c_create()     // 创建实例化设备，供 QEMU 的 C 代码调用  
 ```  
 
-- GPIO_I2C主控设备为极简实现，未实现中断逻辑和复位逻辑。(仿pl011)  
-- 寄存器的地址偏移和特定寄存器结构体在同crate的`registers.rs`中定义。  
-- I2C总线在`i2c_core`的crate中的`core.rs`中定义。  
-- I2C从机在`i2c_slave`的crate中进行不同外设的定义。  
+- GPIO_I2C 主控设备为极简实现，未实现中断逻辑和复位逻辑。(仿 pl011)  
+- 寄存器的地址偏移和特定寄存器结构体在同 crate 的`registers.rs`中定义。  
+- I2C 总线在`i2c_core`的 crate 中的`core.rs`中定义。  
+- I2C 从机在`i2c_slave`的 crate 中进行不同外设的定义。  
 
-### 🔗 GPIO_I2C主控的业务函数调用链条  
+### 🔗 GPIO_I2C 主控的业务函数调用链条  
 ```  
 gpio_i2c_create  
   └> GPIOI2CState::new  
@@ -171,11 +171,11 @@ qtest_writel -> GPIOI2C_OPS.write -> GPIOI2CState::write -> GPIOI2CRegisters::wr
 - `GPIOI2CState::init`初始化由`GPIOI2CState::new`构造间接调用。  
 - `GPIOI2CState::realize`实体化由`GPIOI2CState::sysbus_realize`实现间接调用。  
 - `I2CBus`分别在`GPIOI2CState`的`init`和`realize`中进行创建和从机挂载。  
-- I2C主从数据传输仅由写控制寄存器触发，写入其余寄存器和读取所有寄存器不触发总线通信。  
+- I2C 主从数据传输仅由写控制寄存器触发，写入其余寄存器和读取所有寄存器不触发总线通信。  
 
 ---  
 
-### 🔄 I2C协议数据流转  
+### 🔄 I2C 协议数据流转  
 ```  
              sys-bus                      i2c-bus  
  risc-v --<----------->-- i2c-master --<----------->-- i2c-slave  
@@ -187,14 +187,14 @@ I2C peripheral                                                                I2
    \-SCL----- ------            ...12345678...123456789...         ----- -----SCL-/  
 ```  
 
-- I2C协议，两线一时钟(SCL)一数据(SDA)，单线进行数据收发。  
+- I2C 协议，两线一时钟 (SCL) 一数据 (SDA)，单线进行数据收发。  
 - 主控选择哪个从机通信，依靠传输数据包内的设备地址，有独立地址寄存器。  
 - 启停信号由主控写控制寄存器触发，不作保存。  
 - 应答信号由字节接收方发起，应答判定结果保存在状态寄存器。  
-- 7位地址+1位读写标记，构成8位保存在地址寄存器，由主控发起。  
-- 8位数据，保存在数据寄存器。  
+- 7 位地址 +1 位读写标记，构成 8 位保存在地址寄存器，由主控发起。  
+- 8 位数据，保存在数据寄存器。  
 
-### 🧩 I2C_BUS的实现框架  
+### 🧩 I2C_BUS 的实现框架  
 ```rust  
 pub struct I2CBus {  
     devices: Vec<Box<dyn I2CSlave>>,  // 挂载在总线上的从机列表  
@@ -212,18 +212,18 @@ impl I2CBus {
     pub fn end_transfer    // 返回结束信号，设置地址为空  
     pub fn send            // 发送数据，调用从机发送函数  
     pub fn recv            // 接收数据，调用从机接收函数  
-    pub fn transfer_write  // 封装完整写流程：起始写传输+连续写入字节+结束传输  
-    pub fn transfer_read   // 封装完整读流程：起始读传输+连续读取字节+结束传输  
+    pub fn transfer_write  // 封装完整写流程：起始写传输 + 连续写入字节 + 结束传输  
+    pub fn transfer_read   // 封装完整读流程：起始读传输 + 连续读取字节 + 结束传输  
 }  
 ```  
 
-- I2C_Bus的实现是在RUST实验一核心代码上稍作修改完成。  
+- I2C_Bus 的实现是在 RUST 实验一核心代码上稍作修改完成。  
 
-### 🧩 I2C_SLAVE的实现框架  
+### 🧩 I2C_SLAVE 的实现框架  
 ```rust  
 pub struct AT24C02Slave {  
     pub addr      : u8,         // 从机设备地址  
-    pub regs      : [u8; 256],  // EEPROM存储数组  
+    pub regs      : [u8; 256],  // EEPROM 存储数组  
     pub pointer   : u8,         // 存储读写指针  
     pub first_byte: bool,       // 标记首字节  
 }  
@@ -236,11 +236,11 @@ impl I2CSlave for AT24C02Slave {
 }  
 ```  
 
-- AT24C02_Slave的实现是在RUST实验一测试代码上稍作修改完成。  
+- AT24C02_Slave 的实现是在 RUST 实验一测试代码上稍作修改完成。  
 
 ---  
 
-### 📦 GPIO_I2C主控的寄存器写根据I2C协议的实现  
+### 📦 GPIO_I2C 主控的寄存器写根据 I2C 协议的实现  
 ```rust  
 impl GPIOI2CRegisters {  
 
@@ -253,13 +253,13 @@ impl GPIOI2CRegisters {
             ADDR     => self.addr     = Addr::from(value),  
             DATA     => self.data     = value,  
 
-        // I2C主从数据传输由写控制寄存器触发，需实现5个逻辑分支：  
+        // I2C 主从数据传输由写控制寄存器触发，需实现 5 个逻辑分支：  
             CTRL     => {  
                 let mut i2c_bus = device.i2c_bus.borrow_mut();  
                 let mut ctrl = Ctrl::from(value);  
                 match (ctrl.en(), ctrl.start(), ctrl.stop(), ctrl.rw()) {  
 
-            // 使能+起始信号：发起传输，更新总线及寄存器状态  
+            // 使能 + 起始信号：发起传输，更新总线及寄存器状态  
                     (true, true, false, _) => {  
                         let addr = u32::from(self.addr) as u8;  
                         let ret  = i2c_bus.start_transfer(addr, ctrl.rw());  
@@ -268,14 +268,14 @@ impl GPIOI2CRegisters {
                         self.status.set_done(true);  
                     },  
 
-            // 使能+停止信号：结束传输，更新总线及寄存器状态  
+            // 使能 + 停止信号：结束传输，更新总线及寄存器状态  
                     (true, false, true, false) => {  
                         i2c_bus.end_transfer();  
                         self.status.set_busy(i2c_bus.is_busy());  
                         self.status.set_done(true);  
                     },  
 
-            // 使能+无起止+写模式：读寄存器发送数据，更新总线及寄存器状态  
+            // 使能 + 无起止 + 写模式：读寄存器发送数据，更新总线及寄存器状态  
                     (true, false, false, false) => {  
                         let data = self.data as u8;  
                         let ret  = i2c_bus.send(data);  
@@ -284,7 +284,7 @@ impl GPIOI2CRegisters {
                         self.status.set_done(true);  
                     },  
 
-            // 使能+无起止+读模式：接收数据写寄存器，更新总线及寄存器状态  
+            // 使能 + 无起止 + 读模式：接收数据写寄存器，更新总线及寄存器状态  
                     (true, false, false, true) => {  
                         let data = i2c_bus.recv();  
                         self.data = data as u32;  
@@ -308,11 +308,11 @@ impl GPIOI2CRegisters {
 }  
 ```  
 
-- I2C主从数据传输由写控制寄存器触发，需实现5个逻辑分支：  
-  - 使能+起始信号：发起传输，更新总线及寄存器状态  
-  - 使能+停止信号：结束传输，更新总线及寄存器状态  
-  - 使能+无起止+写模式：读寄存器发送数据，更新总线及寄存器状态  
-  - 使能+无起止+读模式：接收数据写寄存器，更新总线及寄存器状态  
+- I2C 主从数据传输由写控制寄存器触发，需实现 5 个逻辑分支：  
+  - 使能 + 起始信号：发起传输，更新总线及寄存器状态  
+  - 使能 + 停止信号：结束传输，更新总线及寄存器状态  
+  - 使能 + 无起止 + 写模式：读寄存器发送数据，更新总线及寄存器状态  
+  - 使能 + 无起止 + 读模式：接收数据写寄存器，更新总线及寄存器状态  
   - 无效控制组合，不执行任何操作  
 
 ---  
@@ -320,12 +320,12 @@ impl GPIOI2CRegisters {
 ### 📝 总结  
 
 - 对于项目个人首先考虑文件目录结构和各种文件命名和代码内部命名。  
-- 在QEMU中RUST编程中，对于主控设备及从机外设的硬件仿真建模，一种协议可以对应一个文件夹。  
+- 在 QEMU 中 RUST 编程中，对于主控设备及从机外设的硬件仿真建模，一种协议可以对应一个文件夹。  
 - 每个主控设备为一个`crate`，总线共同逻辑抽象为独立`crate`，从机外设集合为独立`crate`。  
-- 总线和从机的逻辑由主控调用，主控作为QEMU中C代码的唯一调用接口。  
-- RUST和C的多语言混合配置构建繁琐，可以把能用的文伯做成清单，逐一修改避免出错。  
-- QEMU设备的实现有相对固定框架，可以复刻`pl011`作名称等相关修改。  
+- 总线和从机的逻辑由主控调用，主控作为 QEMU 中 C 代码的唯一调用接口。  
+- RUST 和 C 的多语言混合配置构建繁琐，可以把能用的文伯做成清单，逐一修改避免出错。  
+- QEMU 设备的实现有相对固定框架，可以复刻`pl011`作名称等相关修改。  
 - 从函数调用链条追踪，最终主控设备协议的主要逻辑在设备寄存器写逻辑中实现。  
 - 协议的总线通信逻辑、总线事件、从机特性都应抽象出来，减少冗余代码。  
-- 项目未用到GDB调试，有待进一步学习，不懂知识由豆包协助推进。  
+- 项目未用到 GDB 调试，有待进一步学习，不懂知识由豆包协助推进。  
 
