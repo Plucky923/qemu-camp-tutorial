@@ -2,9 +2,9 @@
 
 !!! note "主要贡献者"
 
-```
-- 作者：[@flamboyant](https://github.com/flamboyant)
-```
+    - 作者：[@flamboyante](https://github.com/flamboyante)
+
+---
 
 > K230 外设建模项目阶段总结（2026 年 7 月 \~ 8 月）。从最简单的 IOMUX 寄存器块起步，走完上游提交流程，再到 DesignWare SSI 控制器的完整建模（标准 PIO / QSPI / IDMA / XIP），最终在 V2/V3 把模型拆成通用控制器 + K230 集成层。
 
