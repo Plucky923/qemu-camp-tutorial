@@ -257,7 +257,7 @@ IDMA 那边还对照过两条路线：Versal OSPI 的 stream 模型（`stream_pu
 | 0    | TR           | 全双工，TX 发多少 RX 回多少      | 裸机/通用驱动                 |
 | 1    | TO           | 只发不收（写 Flash 用）        | U-Boot Page Program     |
 | 2    | RO           | 只收不发，需一个 dummy word 启动 | 纯读                      |
-| 3    | EEPROM\_READ | 先发指令+地址，再按 NDF 自动收     | **spi-mem Read-ID 就是它** |
+| 3    | EEPROM\_READ | 先发指令 + 地址，再按 NDF 自动收     | **spi-mem Read-ID 就是它** |
 
 怎么确认的？两条线索交叉：
 
@@ -611,4 +611,4 @@ V3 五个 commit 重写完成，qtest 收敛成 14 项，构建、checkpatch、`
 
 \[5] QEMU DesignWare I2C 通用模型先例（hw/i2c/designware\_i2c.c）. <https://github.com/qemu/qemu>
 
-\[6] QEMU Camp 训练营仓库. <https://github.com/gevico/qemu-camp-tutorial>
+\[6] QEMU Camp 训练营仓库。<https://github.com/gevico/qemu-camp-tutorial>
