@@ -1,9 +1,9 @@
 site_name: QEMU Training Camp
 site_author: GTOC
-site_url: https://github.com/gevico
-repo_name: gevico/qemu-camp-tutorial
-repo_url: https://github.com/gevico/qemu-camp-tutorial
-copyright: Brought to you by <a href="https://github.com/gevico">Gevico Tech Open Community</a>. Available freely under the MIT license.
+site_url: https://qemu.gevico.online
+repo_name: qemu-camp/qemu-camp-tutorial
+repo_url: https://github.com/qemu-camp/qemu-camp-tutorial
+copyright: Brought to you by <a href="https://github.com/qemu-camp">Gevico Tech Open Community</a>. Available freely under the MIT license.
 
 plugins:
   - md-preview:

@@ -1,5 +1,5 @@
 {
-    "organization": "gevico",
+    "organization": "qemu-camp",
     "max_runs_per_repo": 6,
     "workers": 4,
     "max_diagnostics_per_page": 40,

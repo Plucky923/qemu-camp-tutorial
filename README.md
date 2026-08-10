@@ -48,9 +48,9 @@ make help
 
 ## 维护团队​
 
-- 发起组织：[格维开源社区](https://github.com/gevico)
+- 发起组织：[格维开源社区](https://github.com/qemu-camp)
 
-- 核心维护团队：[QEMU 训练营项目组](https://github.com/gevico/qemu-training-camp)
+- 核心维护团队：[QEMU 训练营项目组](https://github.com/qemu-camp)
 
 - 社群支持：[QEMU 训练营 QQ 群](https://qm.qq.com/q/DxIhHgpItM)
 
