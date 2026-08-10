@@ -631,8 +631,12 @@ body:has(.home-page) .md-content__inner > h1:first-child {
   <section class="home-section">
     <div class="home-section__head">
       <h2>最新动态</h2>
-      <a href="news/2026/qemu-camp-project-stage-2026-07-03/">更多</a>
+      <a href="news/2026/qemu-camp-closing-2026-08-09/">更多</a>
     </div>
+    <a class="home-list-item" href="news/2026/qemu-camp-closing-2026-08-09/">
+      <span>QEMU 训练营 2026 圆满结营：从 QEMU 学习走向基础设施实践</span>
+      <small>2026.08.09</small>
+    </a>
     <a class="home-list-item" href="news/2026/qemu-camp-project-stage-2026-07-03/">
       <span>QEMU 训练营 2026 项目阶段正式开启</span>
       <small>2026.07.03</small>
