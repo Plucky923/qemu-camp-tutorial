@@ -1,4 +1,4 @@
-# QEMU Training Camp
+# QEMU Camp 2026
 
 <style>
 body:has(.home-page) .md-main__inner {
@@ -545,7 +545,7 @@ body:has(.home-page) .md-content__inner > h1:first-child {
   <section class="home-hero">
     <img class="home-hero__image" src="image/qemu-camp-hero-bg.png" alt="QEMU 训练营科技渐变背景" />
     <div class="home-hero__content">
-      <span class="home-eyebrow">QEMU Training Camp</span>
+      <span class="home-eyebrow">QEMU Camp 2026</span>
       <p class="home-hero__title">QEMU 训练营 2026</p>
       <p class="home-hero__desc">以模拟器/虚拟化技术为底座的 CPU/GPGPU 体系结构相关的开放学习与实践平台，全程免费，资料开源，社区共建。</p>
       <div class="home-hero__actions">
