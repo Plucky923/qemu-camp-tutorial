@@ -1,5 +1,5 @@
 {
-  "program_name": "QEMU Training Camp",
+  "program_name": "QEMU Camp 2026",
   "current_year": 2026,
   "available_years": [2025, 2026, 2027],
   "api_base": "https://api.qemu.gevico.online"
