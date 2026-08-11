@@ -547,7 +547,7 @@ body:has(.home-page) .md-content__inner > h1:first-child {
     <div class="home-hero__content">
       <span class="home-eyebrow">QEMU Camp 2026</span>
       <p class="home-hero__title">QEMU 训练营 2026</p>
-      <p class="home-hero__desc">以模拟器/虚拟化技术为底座的 CPU/GPGPU 体系结构相关的开放学习与实践平台，全程免费，资料开源，社区共建。</p>
+      <p class="home-hero__desc">以模拟器/虚拟化技术为底座的 AI Infra 学习与实践平台，全程免费，资料开源，社区共建。</p>
       <div class="home-hero__actions">
         <a class="home-button home-button--primary" href="tutorial/2026/">开始学习</a>
         <a class="home-button" href="enroll/">GitHub 报名</a>
@@ -717,7 +717,7 @@ body:has(.home-page) .md-content__inner > h1:first-child {
   <section class="home-section home-about">
     <div>
       <h2>关于 QEMU 训练营</h2>
-      <p>QEMU 训练营是在清华大学陈渝老师团队的倡议下，由格维开源社区发起，并与华中科技大学开放原子俱乐部联合主办的公益性技术训练营，旨在搭建一个以模拟器/虚拟化技术为底座的 CPU/GPGPU 体系结构相关的开放学习与实践平台，全程免费，资料开源，社区共建。</p>
+      <p>QEMU 训练营由格维开源社区与华中科技大学开放原子俱乐部联合主办，最初由清华大学陈渝老师团队提出倡议，旨在搭建一个以模拟器/虚拟化技术为底座的 AI Infra 学习与实践平台。训练营全程免费，资料开源，社区共建。</p>
     </div>
     <div class="home-about__meta">
       <span>发起组织：格维开源社区</span>
